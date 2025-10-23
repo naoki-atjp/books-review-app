@@ -4,8 +4,8 @@ services:
   # サービス名
   django:
     build:
-      context: ./containers # Dockerfileがあるディレクトリまでの相対パス
-      dockerfile: Dockerfile # Dockerfileのファイル名
+      context: .
+      dockerfile: containers/Dockerfile # Dockerfileのファイル名
 
     # 作成するコンテナ名の指定
     container_name: django
@@ -19,4 +19,24 @@ services:
 
     volumes:
       # ローカルの作業ディレクトリと仮想環境の作業ディレクトリの対応づけ
-      - ${SRC_PATH}:/root/workspace
+      - ./:/root/workspace
+
+    working_dir: /root/workspace/src/sample
+    depends_on:
+      - db # dbが起動してからdjangoが起動
+
+  # PostgreSQL
+  db:
+    image: postgres:16
+    container_name: db
+    environment:
+      POSTGRES_DB: books_review_app
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: BkReview#5433App
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

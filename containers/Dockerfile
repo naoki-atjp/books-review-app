@@ -1,11 +1,10 @@
 FROM python:3.9.11
 
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-RUN mkdir -p /root/workspace
-COPY requirements.txt /root/workspace/
+COPY containers/requirements.txt /tmp/requirements.txt
 WORKDIR /root/workspace
 
-RUN pip install --upgrade pip\
-    && pip install --upgrade setuptools\
-    && pip install -r requirements.txt
+RUN pip install --upgrade pip setuptools \
+  && pip install -r /tmp/requirements.txt
