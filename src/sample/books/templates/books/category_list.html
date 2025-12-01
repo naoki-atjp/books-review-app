@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}カテゴリ一覧{% endblock %}
+
+{% block content %}
+<h1>カテゴリ一覧</h1>
+
+<p><a href="{% url 'category_create' %}">＋ 新しいカテゴリを作る</a></p>
+
+<table border="1" cellpadding="4">
+  <tr>
+    <th>ID</th>
+    <th>コード</th>
+    <th>名前</th>
+    <th>操作</th>
+  </tr>
+  {% for category in categories %}
+  <tr>
+    <td>{{ category.id }}</td>
+    <td>{{ category.category_code }}</td>
+    <td>{{ category.category_name }}</td>
+    <td>
+      <a href="{% url 'category_update' category.pk %}">編集</a>
+      |
+      <form action="{% url 'category_delete' category.pk %}" method="post" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit">削除</button>
+      </form>
+    </td>
+  </tr>
+  {% empty %}
+  <tr>
+    <td colspan="4">まだカテゴリがありません</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

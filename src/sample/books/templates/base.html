@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+  <head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}IT書籍レビューアプリ{% endblock %}</title>
+  </head>
+
+  <body>
+    {% if user.is_authenticated %}
+    <p>ログイン中：{{ user.email }}</p>
+    {% else %}
+    <p>ログインしていません</p>
+    {% endif %}
+
+    <hr />
+
+    {% block content %}
+    <!-- 各ページごとの中身がここに入る -->
+    {% endblock %}
+  </body>
+
+</html>

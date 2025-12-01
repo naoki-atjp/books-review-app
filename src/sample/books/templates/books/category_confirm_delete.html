@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}カテゴリ削除{% endblock %}
+
+{% block content %}
+<h1>カテゴリ削除</h1>
+
+<p>「{{ category.category_name }}」を本当に削除してもよいですか？</p>
+
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">はい、削除します</button>
+</form>
+
+<p><a href="{% url 'category_list' %}">キャンセルして一覧に戻る</a></p>
+{% endblock %}
