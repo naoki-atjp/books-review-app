@@ -3,11 +3,14 @@
 
   <head>
     <meta charset="UTF-8" />
+    {% load static %}
+    <link href="{% static 'css/dist/styles.css' %}" rel="stylesheet">
     <title>{% block title %}IT書籍レビューアプリ{% endblock %}</title>
   </head>
 
   <body>
     {% if user.is_authenticated %}
+
     <p>ログイン中：{{ user.email }}</p>
     {% else %}
     <p>ログインしていません</p>
