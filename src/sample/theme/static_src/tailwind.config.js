@@ -42,7 +42,10 @@ module.exports = {
         // '../../**/*.py'
     ],
     theme: {
-        extend: {},
+        extend: {
+
+            // ここにカスタムを記述
+        },
     },
     plugins: [
         /**
