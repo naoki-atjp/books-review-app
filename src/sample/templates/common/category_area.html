@@ -1,0 +1,27 @@
+<!-- カテゴリ エリア -->
+{% load static %}
+
+<div id="categoryArea" class="wrapper blue-border-box bg-white">
+  <div>
+    <h3 class="text-base text-customGray mb-2">言語・フレームワーク</h3>
+    <div class="flex flex-wrap gap-2 mb-4">
+      {% for name in language_categories %}
+      <button type="button" class="category-pill js-category-pill text-xs" data-category-group="language"
+        data-category-name="{{ name }}">
+        {{ name }}
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+  <div>
+    <h3 class="text-customGray mb-2">ジャンル</h3>
+    <div class="flex flex-wrap gap-2">
+      {% for name in genre_categories %}
+      <button type="button" class="category-pill js-category-pill text-xs" data-category-group="genre"
+        data-category-name="{{ name }}">
+        {{ name }}
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+</div>

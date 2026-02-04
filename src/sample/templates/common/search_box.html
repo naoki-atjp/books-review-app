@@ -1,0 +1,23 @@
+<!-- 検索エリア -->
+{% load static %}
+
+<!-- TODO: レビュー検索時とレビューする書籍検索時で検索ロジックを分ける -->
+<div class="wrapper blue-border-box bg-white">
+  <p class="text-customGray mb-3">書籍を検索</p>
+
+  <form method="get" action="{{ action_url }}" class="flex items-center gap-4">
+    <div class="relative flex-1">
+      <span class="pointer-events-none absolute inset-y-0 left-6 flex items-center text-slate-400">
+        <img src="{% static 'img/search.svg' %}" alt="" class="w-8" />
+      </span>
+      <input 
+        type="text"
+        name="q"
+        value="{{ query|default:'' }}"
+        placeholder="{{ placeholder|default:'書籍の名前・著者・キーワード' }}"
+        class="w-full rounded-lg border-2 border-[#4788FF4D] bg-customWhite pl-16 py-4 placeholder:text-customGray focus:outline-none focus:ring-2 focus:ring-[#2F6FED] focus:border-transparent" />
+    </div>
+
+    <button type="submit" class="button top-1ransition-all duration-300 w-20">検索</button>
+  </form>
+</div>

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}マイページ{% endblock %}
+
+{% block page_content %}
+<div class="mb-6">
+
+  <!-- 戻る -->
+  <div class="pt-8 mb-4">
+    <a href="javascript:history.back()" class="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800">
+      <span class="text-xl">←</span>
+      <span>戻る</span>
+    </a>
+  </div>
+
+  <!-- 上部UI -->
+  {% if is_edit %}
+  {% include "users/user_edit.html" %}
+  {% else %}
+  {% include "users/mypage_header.html" %}
+  {% endif %}
+
+  <!-- 投稿したレビュー一覧 -->
+  <div class="mt-10">
+
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-[#000480] text-lg font-semibold">
+        投稿したレビュー
+      </h2>
+      {% include "common/sort_dropdown.html" %}
+    </div>
+
+    {% if my_reviews|length == 0 %}
+    <div class="bg-white border border-[#d1d1d1] rounded-2xl p-6 shadow-sm">
+      <p class="text-customGray text-sm">
+        まだレビューが投稿されていません。
+      </p>
+    </div>
+    {% else %}
+    <div class="space-y-6">
+      {% for r in my_reviews %}
+      {% url 'reviews:detail' book_id=r.book_id review_id=r.id as detail_url %}
+      {% include "reviews/review_excerpt_mypage.html" with r=r detail_url=detail_url %}
+      {% endfor %}
+    </div>
+    {% endif %}
+
+  </div>
+
+</div>
+
+<script src="{% static 'js/pulldown.js' %}"></script>
+<script src="{% static 'js/icon_select.js' %}"></script>
+{% endblock %}

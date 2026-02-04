@@ -1,0 +1,72 @@
+<!-- TOP/人気書籍カード -->
+{% load static %}
+
+<article class="
+    bg-white
+    border border-[#d1d1d1]
+    rounded-2xl
+    p-4
+    shadow-sm
+  ">
+  <div class="flex gap-4">
+    <div class="
+        h-auto
+        w-24
+        rounded-md
+        flex-none
+        shrink-0
+      ">
+      {% if book.book_img %}
+      <img src="{{ book.book_img }}" alt="{{ book.book_title }}" class="w-full h-full object-cover" />
+      {% else %}
+      <img src="{% static 'img/dummy_book.svg' %}" alt="dummy book" class="w-full h-full object-cover rounded-md" />
+      {% endif %}
+    </div>
+
+    <div class="flex-1 min-w-0">
+      <div class="flex justify-start overflow-x-hidden min-w-0 w-full js-categories-clip">
+        {% if book.categories %}
+        <div class="categories js-categories">
+          <div class="categories-row js-categories-row">
+
+            <div class="category-row-group js-category-row-group">
+              {% for name in book.categories %}
+              <span class="book-category-item">{{ name }}</span>
+              {% endfor %}
+            </div>
+
+            <div class="category-row-group-sub">
+              {% for name in book.categories %}
+              <span class="book-category-item">{{ name }}</span>
+              {% endfor %}
+            </div>
+
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <h3 class="mt-4 text-base">
+        {{ book.book_title }}
+      </h3>
+
+      {% if book.author %}
+      <p class="mt-2 text-sx text-customGray">
+        {{ book.author }}
+      </p>
+      {% endif %}
+
+      <div class="mt-3 flex items-center gap-1">
+        <img src="{% static 'img/star.svg' %}" class="w-4" />
+
+        <span class="text-base">
+          {{ book.avg_rating }}
+        </span>
+
+        <span class="text-base text-customGray">
+          ({{ book.review_count }}件)
+        </span>
+      </div>
+    </div>
+  </div>
+</article>

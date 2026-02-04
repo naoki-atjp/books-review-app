@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block page_content %}
+<div class="wrapper pt-16">
+  <h1 class="text-2xl mb-4">ログイン（開発用）</h1>
+
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+
+    <!-- Django標準のログインフォーム -->
+    {{ form.as_p }}
+
+    <button type="submit" class="button px-4 py-2">
+      ログイン
+    </button>
+  </form>
+</div>
+{% endblock %}

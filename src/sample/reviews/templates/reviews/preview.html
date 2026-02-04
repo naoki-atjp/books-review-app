@@ -1,0 +1,117 @@
+{% load static %}
+
+<div id="previewModal" class="fixed inset-0 z-[9999] hidden">
+
+  {# 背景（半透明の黒） #}
+  <div id="previewBackdrop" class="absolute inset-0 bg-black/40"></div>
+
+  {# モーダル本体（中央固定） #}
+  <div class="
+      absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
+      w-[min(520px,92vw)]
+      rounded-2xl bg-white shadow-2xl
+      border border-[#E6E6E6]
+      overflow-hidden
+    ">
+
+    {# 中身スクロール領域（モーダルは固定サイズ、内容が長いと中だけスクロール） #}
+    <div class="max-h-[86vh] overflow-y-auto p-6">
+
+      {# ========= ヘッダー ========= #}
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <p class="text-xl font-bold">プレビュー</p>
+          <p class="text-xs text-customGray mt-1">レビューの最終確認</p>
+        </div>
+
+        {# 閉じるボタン（右上） #}
+        <button id="previewCloseBtn" type="button"
+          class="w-8 h-8 rounded-lg border border-[#d1d1d1] hover:bg-slate-50 flex items-center justify-center"
+          aria-label="閉じる">
+          ×
+        </button>
+      </div>
+
+      {# ========= 星 + 数値 ========= #}
+      <div class="flex items-center gap-2 mb-3">
+        {# ★はJSで差し替える #}
+        <div id="previewStars" class="flex items-center gap-1"></div>
+
+        {# 数値（例：4.8） #}
+        <p id="previewRatingText" class="text-sm text-[#111]">-</p>
+      </div>
+
+      {# ========= レビュータイトル（青） ========= #}
+      <p id="previewTitle" class="text-[#0008FF] text-base mb-8">
+        （レビュータイトル）
+      </p>
+
+      {# ========= 書籍カード（青枠） ========= #}
+      <section class="rounded-xl border border-[#93C0FF] bg-[#F2F6FF] p-4 mb-8">
+        <div class="flex gap-4 items-center">
+
+          {# 表紙（左の四角） #}
+          <div class="w-[100px] rounded-lg bg-gray-400 flex-none overflow-hidden">
+            {% if selected_book.book_img %}
+            <img src="{{ selected_book.book_img }}" alt="{{ selected_book.book_title }}"
+              class="w-full h-full object-cover block" />
+            {% else %}
+            <img src="{% static 'img/dummy_book.svg' %}" alt="dummy book" class="w-full h-full object-cover block" />
+            {% endif %}
+          </div>
+
+          {# 本情報（右） #}
+          <div class="min-w-0">
+            <p id="previewBookTitle" class="text-base mb-2 line-clamp-2">
+              {{ selected_book.book_title }}
+            </p>
+
+            <p id="previewBookAuthor" class="text-sm text-customGray mb-2">
+              {% if selected_book.author %}{{ selected_book.author }}{% endif %}
+            </p>
+
+            <p id="previewBookMeta" class="text-sm text-customGray mb-2">
+              {% if selected_book.company %}{{ selected_book.company }}{% endif %}
+              {% if selected_book.published_date %}（{{ selected_book.published_date }}）{% endif %}
+            </p>
+
+            {# カテゴリタグ（JSでチェック済みカテゴリを表示） #}
+            <div id="previewCategoryBadges" class="flex flex-wrap gap-2"></div>
+          </div>
+        </div>
+      </section>
+
+      {# ========= レビュー内容 ========= #}
+      <section class="mb-8">
+        <p class="text-base text-[#000480] mb-4">レビュー内容</p>
+        <p id="previewReviewText" class="text-base text-customGray whitespace-pre-wrap leading-6">
+          （レビュー本文）
+        </p>
+      </section>
+
+      {# ========= おすすめ（緑枠） ========= #}
+      <section class="mb-8">
+        <p class="text-base text-[#000480] mb-4">こんな人におすすめ</p>
+
+        <div class="rounded-xl border border-[#39C16C] bg-[#EFFFF3] p-4">
+          <p id="previewRecommendedFor" class="text-base text-customGray whitespace-pre-wrap leading-6">
+            （おすすめする人）
+          </p>
+        </div>
+      </section>
+
+      {# ========= タブ（見た目だけ） ========= #}
+      <div class="flex items-center gap-3 mb-4">
+        <button type="button" class="px-2 py-1 rounded-lg bg-[#00B418] text-white text-xs">
+          学習フロー
+        </button>
+        <button type="button" class="rounded-lg text-base text-[#000480]">
+          実践した学習方法
+        </button>
+      </div>
+
+      {# ========= 学習フロー一覧（JSが中にカードを作る） ========= #}
+      <div id="previewFlowList"></div>
+    </div>
+  </div>
+</div>

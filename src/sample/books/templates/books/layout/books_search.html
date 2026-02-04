@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %} レビューを作成する書籍検索ページ {% endblock %}
+
+{% block page_content %}
+
+<div class="wrapper mb-6">
+  <div class="pt-16 mb-6">
+    {% include "common/back_button.html" %}
+    <h1 class="text-[#000480] text-2xl mb-4">レビューする書籍を検索</h1>
+    <p class="tracking-wider">書籍のタイトルや著者名で検索して、レビューを書く書籍を選択してください</p>
+  </div>
+
+  <div class="mb-8">
+    {% include "common/search_box.html" with action_url=action_url query=query label="レビューする書籍を検索" %}
+  </div>
+
+  <!-- エラー表示 -->
+  {% if error_message %}
+  <p class="text-red-500">{{ error_message }}</p>
+  {% endif %}
+
+  <!-- 件数表示（qがある時だけ） -->
+  {% if query %}
+  <p class="text-customGray">
+    {% if total_items >= 100 %}
+    100件以上見つかりました（先頭100件まで表示）
+    {% else %}
+    {{ total_items }}件見つかりました
+    {% endif %}
+  </p>
+  {% endif %}
+
+  <!-- {% url 'books:select_book' as action_url_select %} -->
+
+  <div class="mt-4 grid grid-cols-2 gap-4">
+    {% for book in books %}
+    <form method="post" action="{% url 'books:select_book' %}" class="block">
+
+      {% csrf_token %}
+      {% include "books/common/book_card_search.html" with book=book %}
+    </form>
+    {% endfor %}
+  </div>
+
+  <!-- ページネーション -->
+  {% include "common/pagination.html" with total_pages=total_pages page_numbers=page_numbers page=page query=query %}
+</div>
+
+{% endblock %}

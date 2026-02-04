@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}レビュー作成{% endblock %}
+
+{% block page_content %}
+<div class="wrapper">
+
+  <div class="pt-16 mb-6">
+    {% include "common/back_button.html" %}
+    <h1 class="text-[#000480] text-2xl mb-4">レビュー作成</h1>
+  </div>
+
+  {# セッションが期限切れ / 未選択のとき #}
+  {% if expired %}
+  <div class="bg-white border border-[#d1d1d1] rounded-2xl p-6 shadow-sm">
+    <p class="text-red-500 mb-4">
+      書籍の選択情報が見つかりませんでした（期限切れ、または未選択の可能性があります）。
+    </p>
+
+    <a href="{% url 'books:search' %}" class="inline-block px-4 py-2 rounded-lg bg-[#000480] text-white">
+      書籍検索に戻る
+    </a>
+  </div>
+</div>
+{% else %}
+
+{# 選択済みの書籍を表示 #}
+<div class="bg-white border border-[#d1d1d1] rounded-2xl p-8 shadow-sm mb-12">
+  <p class="mb-4">レビュー対象の書籍</p>
+  <section class="w-full rounded-2xl bg-[#F2F6FF] border-[2px] border-[#E0EBFF] p-4 mb-9">
+    <div class="flex gap-4 items-center">
+      {# 表紙 #}
+      <div class="w-[100px] flex-none">
+        {% if selected_book.book_img %}
+        <img src="{{ selected_book.book_img }}" alt="{{ selected_book.book_title }}"
+          class="w-full aspect-[3/4] object-cover rounded-lg block" />
+        {% else %}
+        <img src="{% static 'img/dummy_book.svg' %}" alt="dummy book"
+          class="w-full aspect-[3/4] object-cover rounded-lg block" />
+        {% endif %}
+      </div>
+
+      {# 本情報 #}
+      <div class="flex-1 min-w-0">
+        <p class="text-xl mb-4 truncate">
+          {{ selected_book.book_title }}
+        </p>
+
+        {% if selected_book.author %}
+        <p class="text-base text-customGray mb-4">
+          {{ selected_book.author }}
+        </p>
+        {% endif %}
+
+        <div class="text-base text-customGray">
+          {% if selected_book.company %}{{ selected_book.company }}{% endif %}
+          {% if selected_book.published_date %}（{{ selected_book.published_date }}）{% endif %}
+        </div>
+
+        <!-- {# volume_id はデバッグ表示 #}
+        <p class="text-xs text-customGray mt-3">
+          volume_id: {{ selected_book.volume_id }}
+        </p> -->
+      </div>
+    </div>
+  </section>
+
+  <form method="post" action="{% url 'reviews:create' %}">
+    {% csrf_token %}
+    <section class="border-[#ebeaea] border-b pb-12 mb-12">
+      <h2 class="mb-2">カテゴリ</h2>
+      <p class="text-xs text-[#707070] mb-2">この書籍に該当するカテゴリを選択してください（複数選択可）</p>
+      {% include "common/category_area.html" %}
+    </section>
+
+    <section class="mb-12">
+      <h2 class="mb-2">評価</h2>
+      <p class="text-xs text-[#707070] mb-2">評価を選択してください</p>
+
+      <div class="flex flex-wrap gap-2">
+
+        {# 0.5 #}
+        <input id="rating-05" type="radio" name="rating" value="0.5" class="peer/r05 sr-only" required>
+        <label for="rating-05" class="
+  px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
+  hover:bg-[#dbeaff]
+  peer-checked/r05:bg-customBlue
+  peer-checked/r05:text-white
+  peer-checked/r05:border-customBlue
+  ">
+          0.5
+        </label>
+
+        {# 1.0 #}
+        <input id="rating-10" type="radio" name="rating" value="1.0" class="peer/r10 sr-only">
+        <label for="rating-10" class="
+  px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
+  hover:bg-[#dbeaff]
+  peer-checked/r10:bg-customBlue
+  peer-checked/r10:text-white
+  peer-checked/r10:border-customBlue
+  ">
+          1.0
+        </label>
+
+        {# 1.5 #}
+        <input id="rating-15" type="radio" name="rating" value="1.5" class="peer/r15 sr-only">
+        <label for="rating-15" class="
+  px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
+  hover:bg-[#dbeaff]
+  peer-checked/r15:bg-customBlue
+  peer-checked/r15:text-white
+  peer-checked/r15:border-customBlue
+  ">
+          1.5
+        </label>
+
+        {# 2.0 #}
+        <input id="rating-20" type="radio" name="rating" value="2.0" class="peer/r20 sr-only">
+        <label for="rating-20" class="
+  px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
+  hover:bg-[#dbeaff]
+  peer-checked/r20:bg-customBlue
+  peer-checked/r20:text-white
+  peer-checked/r20:border-customBlue
+  ">
+          2.0
+        </label>
+
+        {# 2.5 #}
+        <input id="rating-25" type="radio" name="rating" value="2.5" class="peer/r25 sr-only">
+        <label for="rating-25" class="
+  px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
+  hover:bg-[#dbeaff]
+  peer-checked/r25:bg-customBlue
+  peer-checked/r25:text-white
+  peer-checked/r25:border-customBlue
+  ">
+          2.5
+        </label>
+
+        {# 3.0 #}
+        <input id="rating-30" type="radio" name="rating" value="3.0" class="peer/r30 sr-only">
+        <label for="rating-30" class="
+  px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
+  hover:bg-[#dbeaff]
+  peer-checked/r30:bg-customBlue
+  peer-checked/r30:text-white
+  peer-checked/r30:border-customBlue
+  ">
+          3.0
+        </label>
+
+        {# 3.5 #}
+        <input id="rating-35" type="radio" name="rating" value="3.5" class="peer/r35 sr-only">
+        <label for="rating-35" class="
+  px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
+  hover:bg-[#dbeaff]
+  peer-checked/r35:bg-customBlue
+  peer-checked/r35:text-white
+  peer-checked/r35:border-customBlue
+  ">
+          3.5
+        </label>
+
+        {# 4.0 #}
+        <input id="rating-40" type="radio" name="rating" value="4.0" class="peer/r40 sr-only">
+        <label for="rating-40" class="
+  px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
+  hover:bg-[#dbeaff]
+  peer-checked/r40:bg-customBlue
+  peer-checked/r40:text-white
+  peer-checked/r40:border-customBlue
+  ">
+          4.0
+        </label>
+
+        {# 4.5 #}
+        <input id="rating-45" type="radio" name="rating" value="4.5" class="peer/r45 sr-only">
+        <label for="rating-45" class="
+  px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
+  hover:bg-[#dbeaff]
+  peer-checked/r45:bg-customBlue
+  peer-checked/r45:text-white
+  peer-checked/r45:border-customBlue
+  ">
+          4.5
+        </label>
+
+        {# 5.0 #}
+        <input id="rating-50" type="radio" name="rating" value="5.0" class="peer/r50 sr-only">
+        <label for="rating-50" class="
+  px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
+  hover:bg-[#dbeaff]
+  peer-checked/r50:bg-customBlue
+  peer-checked/r50:text-white
+  peer-checked/r50:border-customBlue">
+          5.0
+        </label>
+      </div>
+    </section>
+
+    <section>
+
+      <div class="mb-9">
+        <label class="block text-base mb-2">レビュータイトル</label>
+        <input type="text" name="review_title"
+          class="w-full text-sm rounded-lg border-2 border-[#4788FF4D] bg-customWhite p-3 placeholder:text-customLightGray focus:outline-none focus:ring-2 focus:ring-[#2F6FED] focus:border-transparent"
+          placeholder="例：初心者におすすめ" />
+      </div>
+
+      <div class="mb-9">
+        <label class="block text-sm mb-2">レビュー本文</label>
+        <textarea name="review_text" rows="5"
+          class="w-full text-sm rounded-lg border-2 border-[#4788FF4D] bg-customWhite p-3 placeholder:text-customLightGray focus:outline-none focus:ring-2 focus:ring-[#2F6FED] focus:border-transparent"
+          placeholder="この書籍の詳細な感想や、学んだことを記述してください"></textarea>
+      </div>
+
+      <div class="mb-9 border-[#ebeaea] border-b pb-12">
+        <label class="block text-sm mb-2">おすすめする人</label>
+        <textarea name="recommended_for" rows="5"
+          class="w-full text-sm rounded-lg border-2 border-[#4788FF4D] bg-customWhite p-3 placeholder:text-customLightGray focus:outline-none focus:ring-2 focus:ring-[#2F6FED] focus:border-transparent"
+          placeholder="どんな人にこの書籍をおすすめしますか"></textarea>
+      </div>
+
+      <div class="border-[#ebeaea] border-b mb-12">
+
+        <!-- =========================
+        学習フロー
+        ========================= -->
+        <section class="mb-12">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm mb-4">学習フローを追加</p>
+              <p class="text-sm text-[#707070]">この書籍をどのように活用して学習したかを記録できます（任意）</p>
+            </div>
+
+            <!-- スイッチ -->
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input id="studyFlowToggle" type="checkbox" class="sr-only peer" />
+              <div class="
+                      w-11 h-6 rounded-full
+                      bg-[#d1d1d1]
+                      peer-checked:bg-[#2F6FED]
+                      transition-colors
+              "></div>
+
+              <div class="
+                      absolute left-[2px] top-[2px]
+                      w-5 h-5 rounded-full bg-white
+                      transition-transform
+                      peer-checked:translate-x-5
+              "></div>
+            </label>
+          </div>
+
+          <div id="studyFlowArea" class="hidden mt-6">
+            <div class="flex items-center justify-between mb-3">
+              <span class="inline-flex items-center px-3 py-1 rounded-lg bg-[#00B418] text-white text-xs">
+                学習フロー
+              </span>
+
+              <button type="button" id="addStepBtnTop"
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#2F6FED] text-[#2F6FED] text-sm">
+                <span class="text-lg leading-none">＋</span>
+                ステップを追加
+              </button>
+            </div>
+
+            <!-- STEP一覧（JSでSTEPカードを描画する） -->
+            <div id="studyFlowSteps" class="space-y-4"></div>
+
+            <!-- 下部：点線の追加ボタン -->
+            <button type="button" id="addStepBtnBottom" class="mt-6 w-full border-2 border-dashed border-[#cfcfcf] rounded-xl py-6 text-[#707070]
+              inline-flex items-center justify-center gap-2 hover:bg-slate-50">
+              <span class="text-xl leading-none">＋</span>
+              ステップを追加
+            </button>
+          </div>
+
+          <!-- ON/OFF状態をサーバに送る -->
+          <input type="hidden" name="study_flow_enabled" id="studyFlowEnabled" value="0" />
+        </section>
+      </div>
+
+      <div class="flex justify-end gap-3">
+        <!-- プレビューボタン -->
+        <button id="previewOpenBtn" type="button" class="
+            inline-flex items-center gap-2
+            px-4 py-2
+            rounded-lg
+            border border-[#2F6FED]
+            text-customBlue
+            bg-white
+            hover:bg-[#F2F6FF]
+            transition
+          ">
+          <img src="{% static 'img/watch.svg' %}" alt="プレビュー" class="w-4 h-4" />
+          <span class="text-sm font-medium">プレビュー</span>
+        </button>
+
+        <!-- レビュー投稿(送信) -->
+        <button type="submit" class="
+            inline-flex items-center
+            px-4 py-2
+            rounded-lg
+            bg-customBlue
+            text-white
+            text-sm font-medium
+            hover:opacity-90
+            transition
+          ">
+          レビューを投稿
+        </button>
+      </div>
+    </section>
+  </form>
+</div>
+
+{% include "reviews/preview.html" %}
+
+
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/flow.js' %}" defer></script>
+{% endblock %}
+
+<!-- TODO: 本当に投稿していいですか？のポップ -->

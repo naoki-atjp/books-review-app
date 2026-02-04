@@ -1,0 +1,7 @@
+{% load static %}
+
+<!-- TODO: 戻るボタン押下時の遷移先をJSで１つ前のページに設定 -->
+<a href="{% url 'home' %}" class="flex items-center gap-2 mb-8">
+  <img src="{% static 'img/back_arrow.svg' %}" alt="戻るボタン" class="w-6 h-6">
+  <p>戻る</p>
+</a>

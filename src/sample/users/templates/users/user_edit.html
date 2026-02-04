@@ -1,0 +1,135 @@
+{% load static %}
+
+<section class="relative rounded-[32px] bg-white border-[3px] border-[#FFDADA] px-12 py-10 shadow-sm">
+
+  {% if messages %}
+  <div class="absolute right-12 top-[300px] z-10">
+    {% for message in messages %}
+    {% if message.tags == "error" %}
+    <div class="flex items-center gap-3 rounded-xl border border-[#c9c9c9] bg-[#F7D6D6] px-6 py-4 shadow-md">
+      <img src="{% static 'img/varid.svg' %}" alt="validation" class="w-5 h-5">
+      <p class="text-sm text-black">{{ message }}</p>
+    </div>
+    {% else %}
+    <div class="flex items-center rounded-xl border border-[#c9c9c9] bg-[#DFF3E1] px-10 py-4 shadow-md">
+      <p class="text-sm text-black">{{ message }}</p>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="flex flex-col lg:flex-row gap-12">
+
+    <div class="shrink-0 flex justify-center lg:justify-start">
+      <input id="profileImageInput" type="file" accept="image/*" class="hidden" />
+      <label for="profileImageInput" class="group relative w-[160px] h-[160px] rounded-full overflow-hidden
+            border-[3px] border-[#7AA7FF] bg-slate-100 cursor-pointer
+            focus-within:ring-2 focus-within:ring-[#2F6FED]/40 focus-within:ring-offset-2" aria-label="プロフィール画像を変更">
+        <img id="profilePreview" src="{% static 'img/user_icon.png' %}" alt="profile"
+          class="w-full h-full object-cover" />
+        <div class="absolute inset-0 flex items-center justify-center">
+          <img src="{% static 'img/icon_img.svg' %}" alt="icon overlay"
+            class="w-10 h-10 drop-shadow-sm opacity-50 transition group-hover:scale-110" />
+        </div>
+        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition"></div>
+      </label>
+    </div>
+
+    <div class="flex-1">
+      <div class="flex items-start justify-between gap-8">
+        <form id="userEditForm" method="post" class="w-full max-w-[820px]">
+          {% csrf_token %}
+
+          <!-- ========= ユーザー名 ========= -->
+          <label class="block text-sm text-[#222] mb-2">
+            ユーザー名
+          </label>
+          <input type="text" name="name" value="{{ user.name|default:'レビュー好き虫' }}" class="w-full rounded-xl border border-[#9DBDFF] px-6 py-4 text-base outline-none
+                   focus:border-[#2F6FED] focus:ring-2 focus:ring-[#2F6FED]/20">
+
+          <!-- ========= メールアドレス ========= -->
+          <label class="block text-sm text-[#222] mt-6 mb-2">
+            メールアドレス
+          </label>
+          <input type="email" name="email" value="{{ user.email|default:'insect@example.com' }}" required
+            inputmode="email" autocomplete="email" class="w-full rounded-xl border border-[#9DBDFF] px-6 py-4 text-base outline-none
+                   focus:border-[#2F6FED] focus:ring-2 focus:ring-[#2F6FED]/20" />
+
+          <!-- ========= パスワード ========= -->
+          <label class="block text-sm text-[#222] mt-6 mb-2">
+            パスワード
+          </label>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <input type="password" name="password" placeholder="新しいパスワード" 　pattern="[A-Za-z0-9]+"
+              title="半角英数字（A-Z, a-z, 0-9）のみ入力できます" class="w-full rounded-xl border border-[#9DBDFF] px-6 py-4 text-base outline-none
+                     focus:border-[#2F6FED] focus:ring-2 focus:ring-[#2F6FED]/20">
+            <input type="password" name="password_confirm" placeholder="パスワードを確認する" 　pattern="[A-Za-z0-9]+"
+              title="半角英数字（A-Z, a-z, 0-9）のみ入力できます" class="w-full rounded-xl border border-[#9DBDFF] px-6 py-4 text-base outline-none
+                     focus:border-[#2F6FED] focus:ring-2 focus:ring-[#2F6FED]/20">
+          </div>
+        </form>
+
+      </div>
+      <!-- ========= 登録日 + ボタン（右側） ========= -->
+      <div class="mt-8 flex items-center justify-between gap-6">
+
+        <div class="flex items-center gap-2">
+          <img src="{% static 'img/calendar.svg' %}" alt="登録日" class="w-4 h-4" />
+          <span class="text-sm">登録日: {{ user_data.registered_date }}</span>
+        </div>
+
+        <div class="flex items-center gap-4 shrink-0">
+
+          <!-- 保存 -->
+          <button type="submit" form="userEditForm" class="
+        group inline-flex items-center gap-2
+        px-6 py-3 rounded-2xl
+        bg-[#0B5FFF] text-white font-semibold
+        shadow-sm
+        transition-all duration-200 ease-out
+        hover:bg-[#0848C9]
+        hover:shadow-sm
+        hover:-translate-y-[1px]
+        active:translate-y-0
+        active:shadow-none
+        focus-visible:outline-none
+        focus-visible:ring-2 focus-visible:ring-[#2F6FED]/40
+      ">
+            <span class="inline-block transition group-hover:scale-110">✓</span>
+            <span>保存</span>
+          </button>
+
+          <!-- キャンセル（戻る） -->
+          <a href="{% url 'users:mypage' %}" class="
+        inline-flex items-center gap-1
+        px-6 py-3 rounded-2xl
+        border border-gray-300
+        text-customGray
+        bg-white
+        transition-all duration-200 ease-out
+        hover:bg-[#DAE7FF]
+        hover:border-[#2F6FED]
+        hover:text-[#000480]
+        hover:shadow-sm
+        hover:-translate-y-[1px]
+        active:translate-y-0
+        active:shadow-none
+        focus-visible:outline-none
+        focus-visible:ring-2 focus-visible:ring-[#2F6FED]/40
+      ">
+            <span class="inline-block">×</span>
+            <span class="font-semibold">キャンセル</span>
+          </a>
+        </div>
+      </div>
+      <hr class="my-10 border-t border-[#D9D9D9]">
+
+      {% include "users/user_stats.html" with stats=user_data.stats %}
+
+    </div>
+  </div>
+</section>
+
+<!-- TODO: 現在のパスワード入力追加 -->

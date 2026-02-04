@@ -1,0 +1,25 @@
+{% load static %}
+
+<article class="
+    bg-white
+    border border-[#d1d1d1]
+    rounded-2xl
+    p-4
+    shadow-sm
+  ">
+  <div class="flex justify-between items-stretch mb-8">
+    <div class="flex items-center">
+      <img src="{% static 'img/user_icon.svg' %}" alt="ユーザーアイコン" class="w-10 mr-2">
+      <div>
+        <p>佐藤太郎</p>
+        <time datetime="yyyy-mm-dd" class="text-xs text-customGray">2025-10-25</time>
+      </div>
+    </div>
+    <img src="{% static 'img/star.svg' %}" alt="">
+  </div>
+  <h3 class="text-customBlue mb-6">Flutter実践開発</h3>
+  <p class="mb-6">基礎を学習した後の”実践的な”基礎学習におすすめ！</p>
+  <p class="text-customLightGray">Futter入門の基礎本を学習した後にこの本を学習しました。基礎的な内
+    ではありながら、実践的な視点でDart言語の書き方やWidgetの使い方の
+    説明が行われていたので、実務視点で学ぶことができました。特に…</p>
+</article>

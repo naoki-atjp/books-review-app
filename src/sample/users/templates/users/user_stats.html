@@ -1,0 +1,35 @@
+{% load static %}
+
+<div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-10 text-center">
+
+  <div class="flex flex-col items-center gap-2">
+    <div class="flex items-center justify-center gap-2">
+      <img src="{% static 'img/book.svg' %}" alt="レビュー投稿" class="w-6" />
+      <span class="text-2xl font-inter text-[#0060E7]">
+        {{ stats.review_count }}
+      </span>
+    </div>
+    <div class="text-customGray">レビュー投稿</div>
+  </div>
+
+  <div class="flex flex-col items-center gap-2">
+    <div class="flex items-center justify-center gap-2">
+      <img src="{% static 'img/hart_outline.svg' %}" alt="合計いいね" class="w-6 h-6" />
+      <span class="text-2xl font-inter text-[#F04]">
+        {{ stats.like_count }}
+      </span>
+    </div>
+    <div class="text-customGray">合計いいね</div>
+  </div>
+
+  <div class="flex flex-col items-center gap-2">
+    <div class="flex items-center justify-center gap-2">
+      <img src="{% static 'img/flow.svg' %}" alt="学習フロー" class="w-6 h-6" />
+      <span class="text-2xl font-inter text-[#00B418]">
+        {{ stats.flow_count }}
+      </span>
+    </div>
+    <div class="text-customGray">学習フロー</div>
+  </div>
+
+</div>

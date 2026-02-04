@@ -1,0 +1,55 @@
+{% load static %}
+
+<header class="bg-customWhite shadow-md py-4">
+  <div class="container flex justify-between items-center">
+    <a href="#">
+      <img src="{% static 'img/logo.svg' %}" class="w-32" />
+    </a>
+
+    <nav class="flex items-center gap-4 text-sm">
+      {# ============ ログイン後 ============== #}
+      {% if user.is_authenticated %}
+      <a href="/" class="hover:bg-[#DBEAFF] flex items-center rounded-lg transition-all duration-300 px-2 py-1">
+        <img src="{% static 'img/home.svg' %}" class="w-4 mr-1" /> HOME
+      </a>
+      <a href="{% url 'users:mypage' %}"
+        class="hover:bg-[#DBEAFF] flex items-center rounded-lg transition-all duration-300 px-2 py-1">
+        <img src="{% static 'img/mypage.svg' %}" class="w-4 mr-1" /> マイページ
+      </a>
+      <a href="{% url 'books:search' %}"
+        class="button flex justify-center items-center transition-all duration-300 w-40">
+        <img src="{% static 'img/pencil.svg' %}" class="w-4 mr-1" />
+        レビューを書く
+      </a>
+      <div class="relative ml-1" id="userMenuRoot">
+
+        <button type="button" id="userMenuButton"
+          class="rounded-full focus:outline-none focus:ring-2 focus:ring-[#2F6FED]" aria-haspopup="menu"
+          aria-expanded="false">
+          <img src="{{ header_user_data.icon_url }}" class="w-10 h-10 rounded-full" />
+        </button>
+
+        <div id="userMenuPopup"
+          class="hidden absolute right-0 mt-2 w-48 rounded-xl border border-[#d1d1d1] bg-white shadow-lg p-2 z-50"
+          role="menu">
+
+          <form method="post" action="{% url 'users:logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="w-full text-left px-3 py-2 rounded-lg hover:bg-[#DBEAFF] transition"
+              role="menuitem">
+              ログアウト
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- ログイン前 -->
+      {% else %}
+      <a href="" class="hover:underline">新規登録</a>
+      <a href="" class="hover:underline">ログイン</a>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+
+<script src="{% static 'js/header_menu.js' %}" defer></script>

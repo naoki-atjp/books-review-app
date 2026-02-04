@@ -1,0 +1,5 @@
+django == 4.2.20
+psycopg2-binary>=2.9
+Pillow
+django-tailwind == 4.4.1
+requests == 2.32.5

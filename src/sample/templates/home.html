@@ -1,0 +1,55 @@
+<!-- トップ画面 -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}HOME | RevitHub{% endblock %}
+
+{% block page_content %}
+<div class="text-center pt-16 mb-6">
+  <h1 class="text-[#000480] text-2xl mb-4">IT書籍のレビュープラットフォーム</h1>
+  <p class="tracking-wider">実践的な学習体験をシェアしよう。あなたのレビューが誰かの学びをサポートします。</p>
+</div>
+
+{% include "common/search_box.html" %}
+
+<h2 class="text-xl text-center mt-10 mb-6 tracking-[0.8px]">カテゴリで絞り込み</h2>
+{% include "common/category_area.html" %}
+
+<section class="mt-8 mb-12">
+  <div class="flex items-center gap-1 mb-3">
+    <img src="static/img/up_arrow.svg" alt="人気の書籍" class="w-8">
+    <h2 class="text-[#000480]">人気の書籍</h2>
+  </div>
+
+  {% if books|length == 0 %}
+  <p class="text-sm text-slate-500">
+    まだレビューが投稿された書籍はありません。
+  </p>
+
+  {% else %}
+  <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+    {% for book in books|slice:":6" %}
+    {% include "books/common/book_card_full.html" %}
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+
+<section class="mb-20">
+  <div class="flex items-center gap-1 mb-3">
+    <img src="static/img/clock.svg" alt="人気の書籍" class="w-6">
+    <h2 class="text-[#000480]">レビュー</h2>
+  </div>
+  {% include "common/swap_button.html" %}
+  <div class="grid gap-4 grid-cols-1 sm:grid-cols-2">
+    {% include "reviews/common/review_card.html" %}
+    {% include "reviews/common/review_card.html" %}
+    {% include "reviews/common/review_card.html" %}
+    {% include "reviews/common/review_card.html" %}
+    {% include "reviews/common/review_card.html" %}
+    {% include "reviews/common/review_card.html" %}
+  </div>
+
+</section>
+
+{% endblock %}

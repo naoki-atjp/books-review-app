@@ -1,0 +1,65 @@
+{% load static %}
+
+  <!-- sessionに保存したい本情報（表示に必要） -->
+  <input type="hidden" name="volume_id" value="{{ book.volume_id }}">
+  <input type="hidden" name="book_img" value="{{ book.book_img }}">
+  <input type="hidden" name="book_title" value="{{ book.book_title }}">
+  <input type="hidden" name="author" value="{{ book.author }}">
+  <input type="hidden" name="company" value="{{ book.company }}">
+  <input type="hidden" name="published_date" value="{{ book.published_date }}">
+
+  <button type="submit" class="w-full h-[150px] text-left">
+
+    <!-- 書籍表示カードのベースレイアウト -->
+    <article class="
+    bg-white
+    border border-[#d1d1d1]
+    rounded-2xl
+    p-4
+    shadow-sm
+    h-full
+  ">
+      <div class="flex gap-4 h-full">
+
+        <!-- 表紙：img -->
+        <div class="h-auto will-change-auto rounded-md flex-none shrink-0">
+          {% if book.book_img %}
+          <img src="{{ book.book_img }}" alt="{{ book.book_title }}" class="w-[90px] h-full object-cover rounded-md" />
+          {% else %}
+          <img src="{% static 'img/dummy_book.svg' %}" alt="dummy book"
+            class="w-[90px] h-full object-cover rounded-md" />
+          {% endif %}
+        </div>
+
+        <div class="flex-1 min-w-0">
+          <!-- タイトル：title -->
+          <h3 class="text-lg truncate max-w-[350px]">
+            {{ book.book_title }}
+          </h3>
+
+          <!-- 著者：author -->
+          {% if book.author %}
+          <p class="mt-6 text-sm text-customGray">
+            {{ book.author }}
+          </p>
+          {% endif %}
+
+          <div class="flex mt-2 text-sm text-customGray gap-1">
+            <!-- 出版社：company -->
+            {% if book.company %}
+            <p>
+              {{ book.company }}
+            </p>
+            {% endif %}
+
+            {% if book.published_date %}
+            <p>
+              ({{ book.published_date }})
+            </p>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+    </article>
+  </button>

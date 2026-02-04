@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load static %}
+
+<!-- 書籍の情報を表示する（book） -->
+<!-- その書籍に投稿されたレビュー一覧を表示する（reviews） -->
+<!-- レビューカードをクリックすると reviews:detail へ飛ぶ -->
+
+{% block title %}書籍レビュー一覧{% endblock %}
+
+{% block page_content %}
+<div class="wrapper pt-16 mb-20">
+
+  <div class="mb-6">
+    {% include "common/back_button.html" %}
+  </div>
+
+  {% if book_not_found %}
+  <div class="bg-white border border-[#d1d1d1] rounded-2xl p-6 shadow-sm">
+    <p class="text-red-500 font-semibold mb-3">書籍が見つかりませんでした。</p>
+    <p class="text-sm text-customGray mb-4">
+      URLの book_id が存在しない可能性があります：{{ book.book_id }}
+    </p>
+    <a href="{% url 'home' %}"
+      class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-customBlue text-white text-sm font-medium hover:opacity-90 transition">
+      HOMEに戻る
+    </a>
+  </div>
+  {% else %}
+
+  <div class="mb-8">
+    {% include "books/common/book_card_detail_header.html" with book=book %}
+  </div>
+
+  <!-- =========================
+  レビュー一覧（下部）
+  reviews は reviews_review 形式の配列を想定
+  - r.id
+  - r.review_title
+  - r.body
+  - r.post_date
+  - r.rating
+  - r.ui.user_name（UI用）
+  - r.ui.likes_count（UI用）
+  - r.ui.has_flow（UI用）
+  ========================= -->
+
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-[#000480]">レビュー一覧</h2>
+
+    <!-- 並び替え（カスタムプルダウン） -->
+    {% include "common/sort_dropdown.html" %}
+  </div>
+
+
+
+  <!-- 次のタスク -->
+  <!-- pulldown.jsの作成と読み込み、そうしてレビューリストの並び替えプルダウンを完成させる -->
+
+
+
+
+
+
+
+  <!-- レビューが0件のとき -->
+  {% if reviews|length == 0 %}
+  <div class="bg-white border border-[#d1d1d1] rounded-2xl p-6 shadow-sm">
+    <p class="text-customGray text-sm">
+      まだレビューが投稿されていません。
+    </p>
+  </div>
+  {% else %}
+
+  <div class="space-y-6">
+    {% for r in reviews %}
+    {% url 'reviews:detail' book_id=book.book_id review_id=r.id as detail_url %}
+    {% include "reviews/review_excerpt.html" with r=r detail_url=detail_url %}
+    {% endfor %}
+  </div>
+
+  {% endif %}
+
+  {% endif %}
+</div>
+
+<!-- TODO: ページネーション実装 pagination.htmlに汎用性を持たせてから実装-->
+
+<script src="{% static 'js/pulldown.js' %}"></script>
+{% endblock %}

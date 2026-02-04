@@ -1,0 +1,11 @@
+{
+  "name": "レビューすき虫",
+  "email": "insect@example.com",
+  "registered_date": "2025-01-15",
+  "icon_path": "img/insect.svg",
+  "stats": {
+    "review_count": 3,
+    "like_count": 38,
+    "flow_count": 1
+  }
+}

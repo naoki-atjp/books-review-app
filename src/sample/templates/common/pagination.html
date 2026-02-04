@@ -1,0 +1,67 @@
+<!-- ページネーション -->
+
+
+{% if total_pages > 1 %}
+
+<nav class="flex justify-center items-center gap-2 mt-10" aria-label="Pagination">
+
+  <!-- 前に戻る矢印 -->
+  {% if page > 1 %}
+  <a href="?q={{ query|urlencode }}&page={{ page|add:'-1' }}"
+    class="w-10 h-10 flex items-center justify-center text-customGray hover:text-black transition" aria-label="前のページへ">
+    <!-- 左矢印 -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+  </a>
+  {% else %}
+  <!-- 1ページ目を表示中は押せない -->
+  <span class="w-10 h-10 flex items-center justify-center text-[#a5a5a5]" aria-disabled="true">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+  </span>
+  {% endif %}
+
+
+  <!-- ページ番号 -->
+  <div class="flex items-center gap-5">
+    {% for p in page_numbers %}
+    {% if p == page %}
+    <!-- 選択中 -->
+    <span class="w-10 h-10 flex items-center justify-center rounded-xl border border-white bg-customBlue text-white"
+      aria-current="page">
+      {{ p }}
+    </span>
+    {% else %}
+    <!-- 未選択 -->
+    <a href="?q={{ query|urlencode }}&page={{ p }}" class="text-black hover:underline" aria-label="{{ p }}ページへ">
+      {{ p }}
+    </a>
+    {% endif %}
+    {% endfor %}
+  </div>
+
+
+  <!-- 次に進む矢印 -->
+  {% if page < total_pages %} <a href="?q={{ query|urlencode }}&page={{ page|add:'1' }}"
+    class="w-10 h-10 flex items-center justify-center text-customGray hover:text-black transition" aria-label="次のページへ">
+    <!-- 右矢印 -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+    </a>
+    {% else %}
+    <!-- 最終ページのときは押せない -->
+    <span class="w-10 h-10 flex items-center justify-center text-[#a5a5a5]" aria-disabled="true">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </span>
+    {% endif %}
+
+</nav>
+
+{% endif %}
+
+<!-- TODO: book_detail.htmlでも流用できるように汎用性を持たせる -->

@@ -1,0 +1,68 @@
+<!-- レビュー一覧ページのレビュー1つ分のコンポーネント -->
+
+<a href="{{ detail_url }}"
+  class="block bg-white border border-[#d1d1d1] rounded-2xl p-6 shadow-sm hover:bg-slate-50 transition">
+
+  <!-- 上段：ユーザー名 / 投稿日 / 星 -->
+  <div class="flex items-start justify-between gap-4 mb-6">
+    <div class="flex items-start gap-3">
+      <!-- ユーザー名の頭文字（匿名ユーザーは存在しない想定なので default は外す） -->
+      <div class="w-10 h-10 rounded-full bg-[#E0EBFF] flex items-center justify-center text-customBlue font-bold">
+        {{ r.ui.user_name|slice:":1" }}
+      </div>
+
+      <div>
+        <div>
+          {{ r.ui.user_name }}
+        </div>
+        <div class="text-xs text-customGray">
+          {{ r.post_date }}
+        </div>
+      </div>
+    </div>
+
+    {% load static %}
+
+    <div class="flex items-center justify-start gap-1 w-[96px] shrink-0">
+      {% for _ in r.ui.full_stars %}
+      <img src="{% static 'img/star.svg' %}" alt="star" class="w-4 h-4" />
+      {% endfor %}
+
+      {% if r.ui.has_half_star %}
+      <img src="{% static 'img/half_star.svg' %}" alt="half star" class="w-2 h-4" />
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- 中段：レビュータイトル / 本文 -->
+  <div class="text-[#000480] text-lg mb-6">
+    {{ r.review_title }}
+  </div>
+
+  <p class="text-customGray text-sm leading-relaxed line-clamp-6 mb-6">
+    {{ r.body }}
+  </p>
+
+  <!-- 下段：いいね / 学習フロー / 詳しく見る -->
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="inline-flex items-center gap-1 text-sm text-customGray">
+        <img src="{% static 'img/hart.svg' %}" alt="いいね" class="w-4 h-4" />
+        <span>{{ r.ui.likes_count|default:0 }}</span>
+      </span>
+      {% if r.ui.has_flow %}
+      <span class="px-3 py-1 rounded-lg bg-[#EAF7EA] text-[#00B418] text-xs font-semibold">
+        学習フローあり
+      </span>
+      {% else %}
+      <span class="px-3 py-1 rounded-lg bg-white border border-[#b1e18e] text-[#00B418] text-xs font-semibold">
+        学習フローなし
+      </span>
+      {% endif %}
+    </div>
+
+    <span class="text-customBlue text-sm font-medium">
+      詳しく見る →
+    </span>
+  </div>
+</a>

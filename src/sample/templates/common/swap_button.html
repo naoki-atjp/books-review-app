@@ -1,0 +1,47 @@
+{% load static %}
+
+<div id="seg" class="inline-flex items-center rounded-full bg-[#E3EBFC] p-1 mb-4">
+  <!-- ボタン：左（初期で選択中） -->
+  <button type="button" data-seg="latest" class="seg-btn rounded-full px-2 py-1 text-xs leading-none transition"
+    aria-pressed="true">
+    最新の投稿
+  </button>
+
+  <!-- ボタン：右 -->
+  <button type="button" data-seg="popular" class="seg-btn rounded-full px-2 py-1 text-xs leading-none transition"
+    aria-pressed="false">
+    人気の投稿
+  </button>
+</div>
+
+<script>
+  // クリックで「白い方」を切り替えるJS
+  const buttons = document.querySelectorAll("#seg .seg-btn");
+
+  const ACTIVE = ["bg-white", "text-black", "shadow-sm"];
+  const INACTIVE = ["bg-transparent", "text-black/70"];
+
+  // 指定ボタンを「選択中」にする関数
+  function setActive(target) {
+    buttons.forEach((btn) => {
+      const isActive = btn === target;
+
+      // 選択中の見た目
+      ACTIVE.forEach((c) => btn.classList.toggle(c, isActive));
+
+      // 未選択の見た目
+      INACTIVE.forEach((c) => btn.classList.toggle(c, !isActive));
+
+      // 押されている状態
+      btn.setAttribute("aria-pressed", String(isActive));
+    });
+  }
+
+  // 初期状態
+  setActive(buttons[0]);
+
+  // クリックされたボタンを白にする
+  buttons.forEach((btn) => {
+    btn.addEventListener("click", () => setActive(btn));
+  });
+</script>
