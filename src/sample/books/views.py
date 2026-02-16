@@ -1,21 +1,25 @@
 from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView, ListView, CreateView, UpdateView, DeleteView
 from django.shortcuts import render
-from core.dummy.category_dummy import get_category_context
 
 from .models import Category
 from .forms import CategoryForm
 from .services.google_books import GoogleBooksApiError
 
-from datetime import timedelta
 from django.shortcuts import redirect
 from django.views import View
-from django.utils import timezone
 
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from .forms import BookSearchForm
 from .services.book_search import search_books_for_view
+
+from books.services.selected_book_session import (
+    build_selected_book_from_post,
+    is_valid_selected_book,
+    save_selected_book_to_session,
+    pop_selected_book_from_session,
+)
 
 from core.dummy.reviews_dummy_loader import (
     load_reviews_dummy,
@@ -137,39 +141,22 @@ class BookSearchView(View):
         return render(request, self.template_name, context)
 
 
-# sessionに書籍情報を保存するときのキー
-SESSION_SELECTED_BOOK_KEY = "selected_book"
-SESSION_SELECTED_BOOK_SAVED_AT_KEY = "selected_book_saved_at"
-
-# セッションに保存する期限：24時間
-SELECTED_BOOK_TTL = timedelta(hours=24)
-
-
 class SelectBookView(View):
     # 検索結果でレビューする書籍をクリックしたときに呼ばれる
     # sessionに書籍情報をメモして /reviews/new/ へ移動
 
     def post(self, request, *args, **kwargs):
-        # POSTで送られてきた本情報を取り出す
-        selected_book = {
-            "volume_id": request.POST.get("volume_id", ""),
-            "book_img": request.POST.get("book_img", ""),
-            "book_title": request.POST.get("book_title", ""),
-            "author": request.POST.get("author", ""),
-            "company": request.POST.get("company", ""),
-            "published_date": request.POST.get("published_date", ""),
-        }
+        # POSTデータから「選択した本」を作る
+        book = build_selected_book_from_post(request.POST)
 
-        if not selected_book["volume_id"] or not selected_book["book_title"]:
+        # 必須情報が足りないなら検索に戻す
+        if not is_valid_selected_book(book):
             return redirect("books:search")
 
-        # sessionに保存
-        request.session[SESSION_SELECTED_BOOK_KEY] = selected_book
+        # セッションへ保存
+        save_selected_book_to_session(request.session, book)
 
-        # 保存時刻も格納（期限チェック用）
-        request.session[SESSION_SELECTED_BOOK_SAVED_AT_KEY] = timezone.now().isoformat()
-
-        # レビュー作成ページへ遷移
+        # レビュー作成ページへ
         return redirect("reviews:create")
 
 
@@ -177,71 +164,8 @@ class CancelSelectedBookView(View):
     # ユーザーがレビュー作成を中止したときに session を削除
 
     def post(self, request, *args, **kwargs):
-        request.session.pop(SESSION_SELECTED_BOOK_KEY, None)
-        request.session.pop(SESSION_SELECTED_BOOK_SAVED_AT_KEY, None)
+        pop_selected_book_from_session(request.session)
         return redirect("books:search")
-
-
-class ReviewCreateView(TemplateView):
-    # レビュー作成ページ
-    # GET: sessionの本情報を表示
-    # POST: 投稿時に Review/Book 保存へ
-    template_name = "reviews/layout/review_form.html"
-
-    def _get_selected_book_or_none(self):
-
-        selected_book = self.request.session.get(SESSION_SELECTED_BOOK_KEY)
-        saved_at_str = self.request.session.get(SESSION_SELECTED_BOOK_SAVED_AT_KEY)
-
-        if not selected_book or not saved_at_str:
-            return None
-
-        try:
-            saved_at = timezone.datetime.fromisoformat(saved_at_str)
-
-            if timezone.is_naive(saved_at):
-                saved_at = timezone.make_aware(saved_at, timezone.get_current_timezone())
-        except ValueError:
-            return None
-
-        if timezone.now() - saved_at > SELECTED_BOOK_TTL:
-            return None
-
-        return selected_book
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        selected_book = self._get_selected_book_or_none()
-
-        # 期限切れ/未選択なら sessionを消して検索へ戻す導線を作成
-        if not selected_book:
-            # 期限切れのセッションを削除
-            self.request.session.pop(SESSION_SELECTED_BOOK_KEY, None)
-            self.request.session.pop(SESSION_SELECTED_BOOK_SAVED_AT_KEY, None)
-
-            context["expired"] = True
-            context["selected_book"] = None
-            return context
-
-        context["expired"] = False
-        context["selected_book"] = selected_book
-
-        # デバッグ用 TODO: 最終削除しておく
-        # print("----- Google Books Search DEBUG -----")
-        # print("query:", query)
-        # print("total_items_raw:", total_items_raw)
-        # print("total_items_capped:", total_items_capped)
-        # print("books_len:", len(books))
-        # print("page:", page)
-        # print("start_index:", start_index)
-        # print("total_pages:", total_pages)
-        # print("------------------------------------")
-
-        context.update(get_category_context())
-        
-        return context
-    
 
 
 class BookDetailView(TemplateView):
