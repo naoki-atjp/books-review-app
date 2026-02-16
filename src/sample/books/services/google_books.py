@@ -1,3 +1,9 @@
+#責務：
+# Google Books APIを叩く「クライアント」を提供する
+# 外部APIのレスポンスを、アプリ内の扱いやすい型（BookItem等）へ変換する
+# 外部API由来の例外は GoogleBooksApiError に統一して上位へ投げる
+# ページ計算や画面都合の加工は book_search.py 側で行う
+
 import requests
 from dataclasses import dataclass
 from typing import Any

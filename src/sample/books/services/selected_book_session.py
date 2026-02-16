@@ -1,3 +1,8 @@
+#責務：
+# 「検索結果で選んだ本」をセッションに保存/取得/削除する処理を集約する
+# セッション期限（TTL）を一元管理し、期限切れ判定もここで行う
+# View側はこのモジュールの関数を呼ぶだけにして、session構造を直接触らない
+
 from __future__ import annotations
 from dataclasses import dataclass
 from datetime import timedelta
@@ -93,6 +98,6 @@ def get_selected_book_or_none(session: Any) -> SelectedBook | None:
     book_img=(selected_book.get("book_img") or ""),
     book_title=(selected_book.get("book_title") or ""),
     author=(selected_book.get("author") or ""),
-    company=(selected_book.get("company" or "")),
+    company=(selected_book.get("company") or ""),
     published_date=(selected_book.get("published_date") or ""),
   )

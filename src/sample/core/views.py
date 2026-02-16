@@ -1,6 +1,5 @@
 from django.views.generic import TemplateView
 from .dummy.review_dummy import get_recent_reviews
-from .dummy.category_dummy import get_category_context
 from books.services.categories import get_categories_for_view
 
 class HomeView(TemplateView):

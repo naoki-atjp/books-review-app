@@ -1,4 +1,7 @@
-# 書籍詳細表示に必要なcontextを作成
+#責務：
+# 書籍詳細ページで必要なcontextを組み立てる（Viewを薄くする）
+# 現在はJSON(dummy)から book/review を取得して整形する
+## Viewは build_book_detail_context(book_id) を呼ぶだけにする
 
 from __future__ import annotations
 from typing import Any, Dict
@@ -46,8 +49,8 @@ def build_book_detail_context(book_id: str) -> Dict[str, Any]:
     enrich_review_ui(data, r)
 
   # 正常時のcontext
-    return {
-      "book_not_found": False,
-      "book": book,
-      "reviews": reviews,
-    }
+  return {
+    "book_not_found": False,
+    "book": book,
+    "reviews": reviews,
+  }

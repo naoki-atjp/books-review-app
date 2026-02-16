@@ -1,3 +1,8 @@
+#責務：
+# booksアプリのURLルーティング定義だけを持つ
+# 「URL → View」を対応づける（ロジックは書かない）
+# 画面やAPIの追加/変更があれば、ここでパスを調整する
+
 from django.urls import path
 from django.http import HttpResponse
 from . import views

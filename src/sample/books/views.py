@@ -1,3 +1,8 @@
+#責務：
+# HTTPの入口（GET/POST）を受け取る
+# 入力（フォーム）を検証し、サービス層を呼び出す
+## ビジネスロジック（検索計算・整形・DB/JSON処理）は services に寄せる
+
 from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView, ListView, CreateView, UpdateView, DeleteView
 from django.shortcuts import render
@@ -12,7 +17,7 @@ from django.views import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from .forms import BookSearchForm
-from .services.book_search import search_books_for_view
+from .services.book_search import search_book_for_view
 
 from books.services.selected_book_session import (
     build_selected_book_from_post,
@@ -21,7 +26,7 @@ from books.services.selected_book_session import (
     pop_selected_book_from_session,
 )
 
-from books.services.books_detail import build_book_detail_context
+from books.services.book_detail import build_book_detail_context
 
 
 # =========================
@@ -115,7 +120,7 @@ class BookSearchView(View):
             return render(request, self.template_name, context)
 
         try:
-            vm = search_books_for_view(query=query, page=page)
+            vm = search_book_for_view(query=query, page=page)
         except GoogleBooksApiError as e:
             context["error_message"] = f"検索に失敗しました: {e}"
             return render(request, self.template_name, context)

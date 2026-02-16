@@ -1,3 +1,8 @@
+#責務：
+# Viewで受け取る入力（GET/POST）をバリデーションする
+# 「空白除去」「型変換」「最低限の制約（min_value等）」をここで保証
+# 画面表示のロジックや外部API呼び出しは書かない
+
 from django import forms
 from .models import Category
 

@@ -1,4 +1,3 @@
-import json
 from django.conf import settings
 from django.views.generic import TemplateView
 from core.dummy.category_dummy import get_category_context
@@ -61,6 +60,9 @@ class ReviewCreateView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        # カテゴリダミーデータ
+        context.update(get_categories_for_view())
+
         selected_book = self._get_selected_book_or_none()
 
         # 期限切れ / 未選択の場合
@@ -75,9 +77,6 @@ class ReviewCreateView(TemplateView):
 
         context["expired"] = False
         context["selected_book"] = selected_book
-
-        # カテゴリダミーデータ
-        context.update(get_categories_for_view())
 
         return context
 

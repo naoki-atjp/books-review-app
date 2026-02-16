@@ -1,3 +1,8 @@
+#責務：
+# booksアプリのDB構造（Model）を定義する
+# View/Serviceから呼ばれるが、ここに表示ロジックや取得ロジックを増やしすぎない
+#（複雑な取得は services 側に寄せる）
+
 from django.db import models
 from core.models import TimeStampedModel, UserAuditModel, SoftDeleteModel
 

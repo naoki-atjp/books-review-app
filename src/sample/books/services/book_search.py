@@ -1,5 +1,8 @@
-# ページネーション上限
-# context用データ整形
+#責務：
+# 書籍検索画面用の「検索条件処理 + ページング計算」を行う
+# GoogleBooksClientを呼び出し、テンプレ用ViewModelを組み立てて返す
+# 最大件数/最大ページなどの上限ルールをここで保証
+# Djangoのrequest/responseは扱わない（Viewから呼ばれる純粋関数に寄せる）
 
 import math
 from dataclasses import dataclass
@@ -22,7 +25,7 @@ class BooksSearchViewModel:
   has_prev: bool
   has_next: bool
 
-def search_books_for_view(query: str, page: int) -> BooksSearchViewModel:
+def search_book_for_view(query: str, page: int) -> BooksSearchViewModel:
   #=====================
   # viewsから呼ばれる関数
   # 検索条件およびページ計算処理
