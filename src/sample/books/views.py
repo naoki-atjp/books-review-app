@@ -1,16 +1,11 @@
-import math
-import json
-from django.conf import settings
 from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView, ListView, CreateView, UpdateView, DeleteView
-from django.middleware.csrf import get_token
 from django.shortcuts import render
-# from django.contrib.auth.mixins import LoginRequiredMixin
 from core.dummy.category_dummy import get_category_context
 
 from .models import Category
 from .forms import CategoryForm
-from .services.google_books import GoogleBooksClient, GoogleBooksApiError
+from .services.google_books import GoogleBooksApiError
 
 from datetime import timedelta
 from django.shortcuts import redirect
@@ -19,6 +14,8 @@ from django.utils import timezone
 
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
+from .forms import BookSearchForm
+from .services.book_search import search_books_for_view
 
 from core.dummy.reviews_dummy_loader import (
     load_reviews_dummy,
@@ -26,12 +23,6 @@ from core.dummy.reviews_dummy_loader import (
     list_reviews_by_book,
     enrich_review_ui,
 )
-
-
-# Google Books検索の上限設定
-MAX_RESULTS_PER_PAGE = 10   # 1ページ10件
-MAX_PAGES = 10              # 最大10ページ = 100件
-MAX_TOTAL_RESULTS = MAX_RESULTS_PER_PAGE * MAX_PAGES  # 100件
 
 
 # =========================
@@ -94,75 +85,54 @@ class BookSearchView(View):
     template_name = "books/layout/books_search.html"
 
     def get(self, request, *args, **kwargs):
-        get_token(request)
 
-        context = {}
+        # テンプレに渡す共通値（初期値）
+        context = {
+            "action_url": reverse("books:search"),
+            "error_message":"",
+            "query": "",
+            "books": [],
+            "total_items": 0,
+            "total_pages": 0,
+            "page": 1,
+            "page_numbers": [],
+            "has_prev": False,
+            "has_next": False,
+        }
 
-        # 検索フォームのaction（/books/search/）
-        context["action_url"] = reverse("books:search")
+        # GETパラメータをフォームで受け取って検証する
+        form = BookSearchForm(request.GET)
+        if not form.is_valid():
+            return render(request, self.template_name, context)
+    
+        query = form.cleaned_data["q"]
+        page = form.cleaned_data.get("page") or 1
 
-        # GETパラメータ
-        query = request.GET.get("q", "").strip()
         context["query"] = query
-
-        # 初期値
-        context["books"] = []
-        context["total_items"] = 0
-        context["total_pages"] = 0
-        context["page"] = 1
-        context["page_numbers"] = []
-        context["has_prev"] = False
-        context["has_next"] = False
-        context["error_message"] = ""
+        context["page"] = page
 
         # 検索語なし → API叩かない
         if not query:
             return render(request, self.template_name, context)
 
-        # page
-        page_str = request.GET.get("page", "1")
         try:
-            page = int(page_str)
-        except ValueError:
-            page = 1
-
-        page = max(page, 1)
-        page = min(page, MAX_PAGES)
-        context["page"] = page
-
-        per_page = MAX_RESULTS_PER_PAGE
-        start_index = (page - 1) * per_page
-
-        if start_index >= MAX_TOTAL_RESULTS:
-            context["total_items"] = MAX_TOTAL_RESULTS
-            context["total_pages"] = MAX_PAGES
-            context["page_numbers"] = list(range(1, MAX_PAGES + 1))
-            context["has_prev"] = page > 1
-            context["has_next"] = False
-            return render(request, self.template_name, context)
-
-        client = GoogleBooksClient()
-
-        try:
-            result = client.search(query=query, start_index=start_index, max_results=per_page)
+            vm = search_books_for_view(query=query, page=page)
         except GoogleBooksApiError as e:
             context["error_message"] = f"検索に失敗しました: {e}"
             return render(request, self.template_name, context)
-
-        books = result.books
-        total_items_raw = result.total_items
-
-        total_items_capped = min(total_items_raw, MAX_TOTAL_RESULTS)
-
-        total_pages = math.ceil(total_items_capped / per_page) if total_items_capped else 0
-        total_pages = min(total_pages, MAX_PAGES)
-
-        context["books"] = books
-        context["total_items"] = total_items_capped
-        context["total_pages"] = total_pages
-        context["page_numbers"] = list(range(1, total_pages + 1))
-        context["has_prev"] = page > 1
-        context["has_next"] = (page < total_pages)
+        
+        # 画面用データをまとめて反映
+        context.update(
+            {
+                "books": vm.books,
+                "total_items": vm.total_items,
+                "total_pages": vm.total_pages,
+                "page": vm.page,
+                "page_numbers": vm.page_numbers,
+                "has_prev": vm.has_prev,
+                "has_next": vm.has_next,
+            }
+        )
 
         return render(request, self.template_name, context)
 
