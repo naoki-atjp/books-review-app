@@ -1,0 +1,29 @@
+{
+  "language_categories": [
+    "JavaScript",
+    "TypeScript",
+    "Python",
+    "Java",
+    "C言語",
+    "C++",
+    "C#",
+    "PHP",
+    "Ruby",
+    "Flutter",
+    "Kotlin",
+    "Swift",
+    "React"
+  ],
+  "genre_categories": [
+    "開発・設計",
+    "アーキテクチャ",
+    "データ・AI",
+    "セキュリティ",
+    "キャリア",
+    "仕事術",
+    "マインド",
+    "学習法",
+    "インフラ・クラウド",
+    "品質・テスト"
+  ]
+}

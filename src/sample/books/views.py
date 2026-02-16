@@ -21,12 +21,7 @@ from books.services.selected_book_session import (
     pop_selected_book_from_session,
 )
 
-from core.dummy.reviews_dummy_loader import (
-    load_reviews_dummy,
-    find_book,
-    list_reviews_by_book,
-    enrich_review_ui,
-)
+from books.services.books_detail import build_book_detail_context
 
 
 # =========================
@@ -177,33 +172,6 @@ class BookDetailView(TemplateView):
         # URL: /books/detail/<str:book_id>/
         book_id = self.kwargs.get("book_id")
 
-        # JSON読み込み
-        data = load_reviews_dummy()
+        context.update(build_book_detail_context(book_id))
 
-        # book 取得
-        book = find_book(data, book_id)
-
-        if not book:
-            context["book_not_found"] = True
-            context["book"] = {"book_id": book_id, "book_title": "（書籍が見つかりません）"}
-            context["reviews"] = []
-            return context
-
-        # categories を表示用に変換
-        raw_categories = book.get("categories", [])
-        book["categories"] = [
-            c.get("category_name", "")
-            for c in raw_categories
-            if c.get("category_name")
-        ]
-
-        # レビュー一覧（book_idで絞る）
-        reviews = list_reviews_by_book(data, book_id)
-
-        for r in reviews:
-            enrich_review_ui(data, r)
-
-        context["book_not_found"] = False
-        context["book"] = book
-        context["reviews"] = reviews
         return context

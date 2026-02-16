@@ -15,6 +15,7 @@ from core.dummy.reviews_dummy_loader import (
     list_flows_by_review,
     enrich_review_ui,
 )
+from books.services.categories import get_categories_for_view
 
 
 # books側と同じキー
@@ -76,7 +77,7 @@ class ReviewCreateView(TemplateView):
         context["selected_book"] = selected_book
 
         # カテゴリダミーデータ
-        context.update(get_category_context())
+        context.update(get_categories_for_view())
 
         return context
 
