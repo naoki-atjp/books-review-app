@@ -123,15 +123,14 @@
     <!-- 下段：いいね / 他のレビューへ -->
     <div class="flex items-center justify-between pt-6">
 
-      {# いいねボタン（見た目確認：localStorage） #}
       <button type="button"
         class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#FF4D7D] text-[#FF4D7D] text-sm font-semibold"
-        id="likeBtn" data-review-id="{{ review.id }}">
+        id="likeBtn"
+        data-like-url="{% url 'reviews:like' book_id=book.book_id review_id=review.id %}">
         <img id="likeIcon" src="{% static 'img/hart_outline.svg' %}" alt="like" class="w-4 h-4" />
         <span>いいね(<span id="likeCount">{{ review.ui.likes_count|default:0 }}</span>)</span>
       </button>
 
-      {# 書籍詳細へ戻す（= この書籍の他のレビューを見る） #}
       <a href="{% url 'books:detail' book_id=book.book_id %}"
         class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-[#0B63E6] text-white text-sm font-semibold hover:opacity-90 transition">
         この書籍の他のレビューを見る

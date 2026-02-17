@@ -14,6 +14,22 @@
     </a>
   </div>
 
+  {% if messages %}
+  <div id="toastArea" class="absolute right-12 top-[370px] z-50 space-y-3">
+    {% for message in messages %}
+    {% if message.tags == "error" %}
+    <div class="flex items-center gap-3 rounded-xl border border-[#c9c9c9] bg-[#F7D6D6] px-6 py-4 shadow-md">
+      <p class="text-sm text-black">{{ message }}</p>
+    </div>
+    {% else %}
+    <div class="flex items-center rounded-xl border border-[#c9c9c9] bg-[#DFF3E1] px-10 py-4 shadow-md">
+      <p class="text-sm text-black">{{ message }}</p>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+
   <!-- 上部UI -->
   {% if is_edit %}
   {% include "users/user_edit.html" %}
@@ -52,4 +68,5 @@
 
 <script src="{% static 'js/pulldown.js' %}"></script>
 <script src="{% static 'js/icon_select.js' %}"></script>
+<script src="{% static 'js/toast.js' %}"></script>
 {% endblock %}

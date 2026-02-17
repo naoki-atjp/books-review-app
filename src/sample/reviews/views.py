@@ -1,6 +1,10 @@
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 from django.views.generic import TemplateView
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from .models import ReviewGood, Review
 
 from books.services.selected_book_session import (
     get_selected_book_or_none,
@@ -9,6 +13,7 @@ from books.services.selected_book_session import (
 from books.services.categories import get_categories_for_view
 from reviews.services.review_detail import build_review_detail_context
 from .forms import ReviewCreateForm
+from reviews.services.review_like import toggle_like_dummy, toggle_like_db
 
 
 class ReviewCreateView(TemplateView):
@@ -43,9 +48,7 @@ class ReviewCreateView(TemplateView):
 
 
     def post(self, request, *args, **kwargs):
-        # -----------------
-        # 0) まずは選択中の書籍を確認
-        # -----------------
+        # まずは選択中の書籍を確認
         selected_book = get_selected_book_or_none(request.session)
 
         # 期限切れなら期限切れ表示で返す
@@ -57,39 +60,31 @@ class ReviewCreateView(TemplateView):
             }
             return render(request, self.template_name, context)
 
-        # -----------------
-        # 1) categories の choices を作る
-        # -----------------
+        # categories の choices を作る
         categories_context = get_categories_for_view()
         language_categories = categories_context.get("language_categories", [])
         genre_categories = categories_context.get("genre_categories", [])
 
         category_choices = [(name, name) for name in (language_categories + genre_categories)]
 
-        # -----------------
-        # 2) Form に POST を入れて検証
-        # -----------------
+        # Form に POST を入れて検証
         form = ReviewCreateForm(
             data=request.POST,
             category_choices=category_choices,
         )
 
-        # -----------------
-        # 3) NGなら、同じ画面に戻す（エラー付き）
-        # -----------------
+        # NGなら、同じ画面に戻す
         if not form.is_valid():
             context = self.get_context_data(**kwargs)
 
-            # ✅ POST時はここで上書き（エラー内容をテンプレに渡す）
+            # POST時はここで上書き（エラー内容をテンプレに渡す）
             context["form"] = form
             context["posted_categories"] = request.POST.getlist("categories")
             context["posted_rating"] = request.POST.get("rating", "")
 
             return render(request, self.template_name, context)
 
-        # -----------------
-        # 4) OKなら clean済みデータを取り出す
-        # -----------------
+        # OKなら clean済みデータを取り出す
         cleaned = form.cleaned_data
         rating = cleaned["rating"]
         categories = cleaned["categories"]
@@ -97,7 +92,7 @@ class ReviewCreateView(TemplateView):
         review_text = cleaned["review_text"]
         study_flow_enabled = cleaned.get("study_flow_enabled", False)
 
-        # 本来ここでDB保存して review_id を作る（今はダミー）
+        # 本来ここでDB保存して review_id を作る
         dummy_review_id = "dummy"
 
         # 二重投稿防止で本選択sessionを消す
@@ -124,3 +119,26 @@ def review_detail(request, book_id: str, review_id: int):
     # サービスから context を受け取って描画するだけ
     context = build_review_detail_context(book_id, review_id)
     return render(request, "reviews/layout/review_detail.html", context)
+
+
+@require_POST
+@login_required
+def review_like_toggle(request, book_id: str, review_id: int):
+    # DB（将来用）
+    # viewsはサービスを呼ぶだけ
+    result = toggle_like_db(user=request.user, book_id=book_id, review_id=review_id)
+
+    if not result.get("ok") and result.get("status") == 404:
+        return JsonResponse(
+            {"ok": False, "message": result.get("message", "not found")},
+            status=404,
+        )
+
+    return JsonResponse(result)
+
+
+@require_POST
+def review_like_dummy(request, book_id: str, review_id: int):
+    # ダミー版
+    result = toggle_like_dummy(session=request.session, review_id=review_id)
+    return JsonResponse(result)

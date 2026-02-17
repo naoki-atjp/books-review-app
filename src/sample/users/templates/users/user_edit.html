@@ -2,23 +2,6 @@
 
 <section class="relative rounded-[32px] bg-white border-[3px] border-[#FFDADA] px-12 py-10 shadow-sm">
 
-  {% if messages %}
-  <div class="absolute right-12 top-[300px] z-10">
-    {% for message in messages %}
-    {% if message.tags == "error" %}
-    <div class="flex items-center gap-3 rounded-xl border border-[#c9c9c9] bg-[#F7D6D6] px-6 py-4 shadow-md">
-      <img src="{% static 'img/varid.svg' %}" alt="validation" class="w-5 h-5">
-      <p class="text-sm text-black">{{ message }}</p>
-    </div>
-    {% else %}
-    <div class="flex items-center rounded-xl border border-[#c9c9c9] bg-[#DFF3E1] px-10 py-4 shadow-md">
-      <p class="text-sm text-black">{{ message }}</p>
-    </div>
-    {% endif %}
-    {% endfor %}
-  </div>
-  {% endif %}
-
   <div class="flex flex-col lg:flex-row gap-12">
 
     <div class="shrink-0 flex justify-center lg:justify-start">
@@ -42,44 +25,47 @@
           {% csrf_token %}
 
           <!-- ========= ユーザー名 ========= -->
-          <label class="block text-sm text-[#222] mb-2">
+          <label for="name" class="block text-sm text-[#222] mb-[6px]">
             ユーザー名
           </label>
-          <input type="text" name="name" value="{{ user.name|default:'レビュー好き虫' }}" class="w-full rounded-xl border border-[#9DBDFF] px-4 py-2 text-base outline-none
+          <input type="text" id="name" name="name" value="{{ form.name.value|default:user.name }}" class="w-full rounded-xl border border-[#9DBDFF] px-4 py-2 text-sm outline-none
                    focus:border-[#2F6FED] focus:ring-2 focus:ring-[#2F6FED]/20">
 
           <!-- ========= メールアドレス ========= -->
-          <label class="block text-sm text-[#222] mt-6 mb-2">
+          <label class="block text-sm text-[#222] mt-4 mb-[6px]">
             メールアドレス
           </label>
-          <input type="email" name="email" value="{{ user.email|default:'insect@example.com' }}" required
-            inputmode="email" autocomplete="email" class="w-full rounded-xl border border-[#9DBDFF] px-4 py-2 text-base outline-none
+          <input type="email" name="email" value="{{ form.email.value|default:user.email }}" required inputmode="email"
+            autocomplete="email" class="w-full rounded-xl border border-[#9DBDFF] px-4 py-2 text-sm outline-none
                    focus:border-[#2F6FED] focus:ring-2 focus:ring-[#2F6FED]/20" />
 
           <!-- ========= パスワード ========= -->
-          <label class="block text-sm text-[#222] mt-6 mb-2">
+          <label class="block text-sm text-[#222] mt-4  mb-[6px]">
             パスワード
           </label>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <input type="password" name="password" placeholder="現在のパスワード" 　pattern="[A-Za-z0-9]+"
-              title="半角英数字（A-Z, a-z, 0-9）のみ入力できます" class="w-full rounded-xl border border-[#9DBDFF] px-4 py-2 text-base outline-none
-                                         focus:border-[#2F6FED] focus:ring-2 focus:ring-[#2F6FED]/20">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+            <!-- 現在のパスワード -->
+            <input type="password" name="current_password" placeholder="現在のパスワード" pattern="[A-Za-z0-9]+"
+              title="半角英数字（A-Z, a-z, 0-9）のみ入力できます" class="w-full rounded-xl border border-[#9DBDFF] px-4 py-2 text-sm outline-none
+                     focus:border-[#2F6FED] focus:ring-2 focus:ring-[#2F6FED]/20">
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <input type="password" name="password" placeholder="新しいパスワード" 　pattern="[A-Za-z0-9]+"
-              title="半角英数字（A-Z, a-z, 0-9）のみ入力できます" class="w-full rounded-xl border border-[#9DBDFF] px-4 py-2 text-base outline-none
+            <!-- 新しいパスワード -->
+            <input type="password" name="new_password" placeholder="新しいパスワード" pattern="[A-Za-z0-9]+"
+              title="半角英数字（A-Z, a-z, 0-9）のみ入力できます" class="w-full rounded-xl border border-[#9DBDFF] px-4 py-2 text-sm outline-none
                      focus:border-[#2F6FED] focus:ring-2 focus:ring-[#2F6FED]/20">
-            <input type="password" name="password_confirm" placeholder="パスワードを確認する" 　pattern="[A-Za-z0-9]+"
-              title="半角英数字（A-Z, a-z, 0-9）のみ入力できます" class="w-full rounded-xl border border-[#9DBDFF] px-4 py-2 text-base outline-none
+            <!-- 新しいパスワード（確認） -->
+            <input type="password" name="new_password_confirm" placeholder="パスワードを確認する" pattern="[A-Za-z0-9]+"
+              title="半角英数字（A-Z, a-z, 0-9）のみ入力できます" class="w-full rounded-xl border border-[#9DBDFF] px-4 py-2 text-sm outline-none
                      focus:border-[#2F6FED] focus:ring-2 focus:ring-[#2F6FED]/20">
           </div>
         </form>
 
       </div>
       <!-- ========= 登録日 + ボタン（右側） ========= -->
-      <div class="mt-8 flex items-center justify-between gap-6">
+      <div class="mt-6 flex items-center justify-between gap-6">
 
         <div class="flex items-center gap-2">
           <img src="{% static 'img/calendar.svg' %}" alt="登録日" class="w-4 h-4" />
@@ -130,7 +116,7 @@
           </a>
         </div>
       </div>
-      <hr class="my-10 border-t border-[#D9D9D9]">
+      <hr class="my-6 border-t border-[#D9D9D9]">
 
       {% include "users/user_stats.html" with stats=user_data.stats %}
 

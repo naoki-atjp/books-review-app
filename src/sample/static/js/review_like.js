@@ -1,51 +1,65 @@
-
-// - localStorage に「このレビューをいいねしたか」を保存 (仮)
+// いいねボタンを押したらサーバーへPOST
+// 返ってきた likes_count / liked で表示更新
 
 document.addEventListener("DOMContentLoaded", () => {
-  const btn = document.getElementById("likeBtn");
-  const icon = document.getElementById("likeIcon");
-  const countEl = document.getElementById("likeCount");
+  const likeBtn = document.getElementById("likeBtn");
+  const likeCountEl = document.getElementById("likeCount");
+  const likeIcon = document.getElementById("likeIcon");
 
-  // このページにいいねUIが無い場合は何もしない（他ページでエラー防止）
-  if (!btn || !icon || !countEl) return;
+  if (!likeBtn || !likeCountEl || !likeIcon) return;
 
-  // review_id を取得（localStorageのキーに使う）
-  const reviewId = btn.dataset.reviewId;
+  // data属性から必要情報を読む
+  const likeUrl = likeBtn.dataset.likeUrl; // テンプレで生成したURLを使う
 
-  const storageKey = `revithub_like_${reviewId}`;
+  if (!likeUrl) return;
 
-  // 1ならいいね済み
-  const isLiked = localStorage.getItem(storageKey) === "1";
-
-  // 初期表示を反映
-  const render = (liked) => {
-    const current = parseInt(countEl.textContent || "0", 10);
-
-    icon.src = liked
-      ? icon.src.replace("hart_outline.svg", "hart.svg")
-      : icon.src.replace("hart.svg", "hart_outline.svg");
-
-    if (liked) {
-      btn.classList.add("bg-[#FFF0F5]");
-    } else {
-      btn.classList.remove("bg-[#FFF0F5]");
-    }
+  // CSRFトークン取得
+  const getCsrfToken = () => {
+    // cookie から csrftoken を取る
+    const match = document.cookie.match(/csrftoken=([^;]+)/);
+    return match ? match[1] : "";
   };
 
-  render(isLiked);
+  // UI反映用関数
+  const applyLikedUi = (liked) => {
+    likeIcon.src = liked
+      ? "/static/img/hart.svg"
+      : "/static/img/hart_outline.svg";
+  };
 
-  btn.addEventListener("click", () => {
-    const likedNow = localStorage.getItem(storageKey) === "1";
-    const nextLiked = !likedNow;
+  // クリックでPOSTしてトグル
+  likeBtn.addEventListener("click", async () => {
+    try {
+      // 二重クリック防止
+      likeBtn.disabled = true;
 
-    // localStorage 更新
-    localStorage.setItem(storageKey, nextLiked ? "1" : "0");
+      const res = await fetch(likeUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCsrfToken(),
+        },
+        body: JSON.stringify({}), // 今は空
+      });
 
-    // カウント更新（UIだけ）
-    const current = parseInt(countEl.textContent || "0", 10);
-    const nextCount = nextLiked ? current + 1 : Math.max(current - 1, 0);
-    countEl.textContent = String(nextCount);
+      if (!res.ok) {
+        console.error("like toggle failed:", res.status);
+        return;
+      }
 
-    render(nextLiked);
+      const data = await res.json();
+
+      if (!data.ok) return;
+
+      // 最新の状態でUI更新
+      if (typeof data.likes_count !== "undefined") {
+        likeCountEl.textContent = String(data.likes_count);
+      }
+      applyLikedUi(!!data.liked);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      likeBtn.disabled = false;
+    }
   });
 });
