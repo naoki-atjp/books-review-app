@@ -1,116 +1,113 @@
-from django.conf import settings
 from django.views.generic import TemplateView
-from core.dummy.category_dummy import get_category_context
-from datetime import timedelta
-from django.utils import timezone
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.urls import reverse
 
-from django.shortcuts import render
-from core.dummy.reviews_dummy_loader import (
-    load_reviews_dummy,
-    find_book,
-    find_review,
-    list_flows_by_review,
-    enrich_review_ui,
+from books.services.selected_book_session import (
+    get_selected_book_or_none,
+    pop_selected_book_from_session,
 )
 from books.services.categories import get_categories_for_view
-
-
-# books側と同じキー
-SESSION_SELECTED_BOOK_KEY = "selected_book"
-SESSION_SELECTED_BOOK_SAVED_AT_KEY = "selected_book_saved_at"
-
-# セッション期限：books/views.py と合わせる
-SELECTED_BOOK_TTL = timedelta(hours=24)
+from reviews.services.review_detail import build_review_detail_context
+from .forms import ReviewCreateForm
 
 
 class ReviewCreateView(TemplateView):
-    """
-    GET : 書籍情報表示
-    POST: 完了ページへリダイレクト（今はDB保存なし）
-    """
+    #-----------------
+    #GET : 書籍情報表示
+    #POST: 完了ページへリダイレクト（今はDB保存なし）
+    #-----------------
     template_name = "reviews/layout/review_form.html"
 
-    def _get_selected_book_or_none(self):
-        # sessionから本情報を取り出す
-        selected_book = self.request.session.get(SESSION_SELECTED_BOOK_KEY)
-        saved_at_str = self.request.session.get(SESSION_SELECTED_BOOK_SAVED_AT_KEY)
-
-        # 本情報 or 保存時刻が無いなら無効
-        if not selected_book or not saved_at_str:
-            return None
-
-        # ISO文字列 → datetime へ変換
-        try:
-            saved_at = timezone.datetime.fromisoformat(saved_at_str)
-
-            # タイムゾーン無しなら付ける
-            if timezone.is_naive(saved_at):
-                saved_at = timezone.make_aware(saved_at, timezone.get_current_timezone())
-        except ValueError:
-            return None
-
-        # 期限切れチェック
-        if timezone.now() - saved_at > SELECTED_BOOK_TTL:
-            return None
-
-        return selected_book
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         # カテゴリダミーデータ
         context.update(get_categories_for_view())
-
-        selected_book = self._get_selected_book_or_none()
+        selected_book = get_selected_book_or_none(self.request.session)
 
         # 期限切れ / 未選択の場合
         if not selected_book:
-            # 期限切れのsessionは削除
-            self.request.session.pop(SESSION_SELECTED_BOOK_KEY, None)
-            self.request.session.pop(SESSION_SELECTED_BOOK_SAVED_AT_KEY, None)
-
+            pop_selected_book_from_session(self.request.session)
             context["expired"] = True
             context["selected_book"] = None
             return context
-
+        
         context["expired"] = False
         context["selected_book"] = selected_book
+        context["form"] = ReviewCreateForm(category_choices=[])
+        context["posted_categories"] = []
+        context["posted_rating"] = ""
 
         return context
 
+
     def post(self, request, *args, **kwargs):
-        # レビュー投稿（今はDB保存なし）
-        # 入力OKなら完了ページへ redirect
-        selected_book = self._get_selected_book_or_none()
+        # -----------------
+        # 0) まずは選択中の書籍を確認
+        # -----------------
+        selected_book = get_selected_book_or_none(request.session)
 
         # 期限切れなら期限切れ表示で返す
         if not selected_book:
-            request.session.pop(SESSION_SELECTED_BOOK_KEY, None)
-            request.session.pop(SESSION_SELECTED_BOOK_SAVED_AT_KEY, None)
-
+            pop_selected_book_from_session(request.session)
             context = {
                 "expired": True,
                 "selected_book": None,
             }
             return render(request, self.template_name, context)
 
-        # フォーム値を受け取る
-        rating = request.POST.get("rating")
+        # -----------------
+        # 1) categories の choices を作る
+        # -----------------
+        categories_context = get_categories_for_view()
+        language_categories = categories_context.get("language_categories", [])
+        genre_categories = categories_context.get("genre_categories", [])
 
-        # チェック（サーバ側）
-        if not rating:
+        category_choices = [(name, name) for name in (language_categories + genre_categories)]
+
+        # -----------------
+        # 2) Form に POST を入れて検証
+        # -----------------
+        form = ReviewCreateForm(
+            data=request.POST,
+            category_choices=category_choices,
+        )
+
+        # -----------------
+        # 3) NGなら、同じ画面に戻す（エラー付き）
+        # -----------------
+        if not form.is_valid():
             context = self.get_context_data(**kwargs)
-            context["error_message"] = "評価が未選択です。"
+
+            # ✅ POST時はここで上書き（エラー内容をテンプレに渡す）
+            context["form"] = form
+            context["posted_categories"] = request.POST.getlist("categories")
+            context["posted_rating"] = request.POST.get("rating", "")
+
             return render(request, self.template_name, context)
 
-        # 本来ここでDB保存して review_id を作る
+        # -----------------
+        # 4) OKなら clean済みデータを取り出す
+        # -----------------
+        cleaned = form.cleaned_data
+        rating = cleaned["rating"]
+        categories = cleaned["categories"]
+        review_title = cleaned["review_title"]
+        review_text = cleaned["review_text"]
+        study_flow_enabled = cleaned.get("study_flow_enabled", False)
+
+        # 本来ここでDB保存して review_id を作る（今はダミー）
         dummy_review_id = "dummy"
 
         # 二重投稿防止で本選択sessionを消す
-        request.session.pop(SESSION_SELECTED_BOOK_KEY, None)
-        request.session.pop(SESSION_SELECTED_BOOK_SAVED_AT_KEY, None)
+        pop_selected_book_from_session(request.session)
+
+        print("cleaned rating:", rating)
+        print("cleaned categories:", categories)
+        print("cleaned title:", review_title)
+        print("cleaned text:", review_text)
+        print("study_flow_enabled:", study_flow_enabled)
 
         # 完了ページへリダイレクト
         complete_url = f"{reverse('reviews:complete')}?review_id={dummy_review_id}"
@@ -123,49 +120,7 @@ def review_complete(request):
     return render(request, "reviews/review_complete.html", {"review_id": review_id})
 
 
-
 def review_detail(request, book_id: str, review_id: int):
-    # DBなし：JSONから book と review を引いて表示
-    # book_id はURLの値
-    # review_id は reviews_review.id と照合
-
-    data = load_reviews_dummy()
-
-    book = find_book(data, book_id)
-    review = find_review(data, review_id)
-    if not book or not review:
-        return render(
-            request,
-            "reviews/layout/review_detail.html",
-            {
-                "not_found": True,
-                "book": {"book_id": book_id, "book_title": "（書籍が見つかりません）"},
-                "review": {"review_id": review_id, "review_title": "（レビューが見つかりません）"},
-                "flows": [],
-            },
-        )
-
-    # UI用データ
-    enrich_review_ui(data, review)
-
-    # flow 取得（position順）
-    flows = list_flows_by_review(data, review_id)
-
-    # カテゴリ表示用
-    raw_categories = book.get("categories", [])
-    book["categories"] = [
-        c.get("category_name", "")
-        for c in raw_categories
-        if c.get("category_name")
-    ]
-
-    return render(
-        request,
-        "reviews/layout/review_detail.html",
-        {
-            "not_found": False,
-            "book": book,
-            "review": review,
-            "flows": flows,
-        },
-    )
+    # サービスから context を受け取って描画するだけ
+    context = build_review_detail_context(book_id, review_id)
+    return render(request, "reviews/layout/review_detail.html", context)

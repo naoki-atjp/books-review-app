@@ -1,5 +1,6 @@
 import json
 from django.conf import settings
+import copy
 
 
 def load_reviews_dummy() -> dict:
@@ -50,39 +51,82 @@ def get_user_name(data: dict, user_id: int) -> str:
 
 
 def enrich_review_ui(data: dict, review: dict) -> dict:
-    # rating を float にする
+    # reviewを直接書き換えない
+    # UI表示用の情報は付加した結果を返す
+
+    # 元のreviewを壊さないようにshallow copy
+    r = copy.deepcopy(review)
+
+    # ratingをfloatにする
     try:
-        rating = float(review.get("rating", 0))
+        rating = float(r.get("rating", 0))
     except (TypeError, ValueError):
         rating = 0.0
 
     full_count = int(rating)
     has_half = (rating - full_count) >= 0.5
 
-    if "ui" not in review or not isinstance(review["ui"], dict):
-        review["ui"] = {}
+    # ui が無い/壊れてても必ず dict を用意
+    base_ui = r.get("ui")
+    if not isinstance(base_ui, dict):
+        base_ui = {}
 
-    # 星表示用
-    review["ui"]["full_stars"] = list(range(full_count))
-    review["ui"]["has_half_star"] = has_half
+    # ここで作るuiを完成形として上書き
+    ui = {}
 
-    # user_name
-    user_name = get_user_name(data, review.get("user_id", 0))
-    if user_name:
-        review["ui"]["user_name"] = user_name
+    ui["full_stars"] = list(range(full_count))  # 例：3なら [0,1,2]
+    ui["has_half_star"] = has_half
+    ui["user_name"] = get_user_name(data, r.get("user_id", 0))
+    ui["likes_count"] = count_likes(data, r.get("id", 0))
+    flows = list_flows_by_review(data, r.get("id", 0))
+    ui["has_flow"] = len(flows) > 0
 
-    # likes_count
-    calculated_likes = count_likes(data, review.get("id", 0))
-    if calculated_likes > 0:
-        review["ui"]["likes_count"] = calculated_likes
-    else:
-        review["ui"]["likes_count"] = int(review["ui"].get("likes_count", 0) or 0)
+    r["ui"] = ui
+    return r
 
-    # has_flow
-    flows = list_flows_by_review(data, review.get("id", 0))
-    if len(flows) > 0:
-        review["ui"]["has_flow"] = True
-    else:
-        review["ui"]["has_flow"] = bool(review["ui"].get("has_flow", False))
+
+def find_review_by_book(data: dict, book_id: str, review_id: int) -> dict | None:
+    # review_idで探す
+    # そのreviewが URL のbook_idと一致するか確認する
+    review = find_review(data, review_id)
+    if not review:
+        return None
+
+    # book_id が一致しないなら見つからない扱い
+    if review.get("book_id") != book_id:
+        return None
 
     return review
+
+
+def get_review_detail_context(data: dict, book_id: str, review_id: int) -> dict:
+    # review_detail.html に渡す context をここで完成させる
+    book = find_book(data, book_id)
+    if not book:
+        return {
+            "not_found": True,
+            "book": {"book_id": book_id},
+            "review": {"review_id": review_id},
+            "flows": [],
+        }
+
+    review = find_review_by_book(data, book_id, review_id)
+    if not review:
+        return {
+            "not_found": True,
+            "book": book,
+            "review": {"review_id": review_id},
+            "flows": [],
+        }
+
+    # ui を付加
+    enriched_review = enrich_review_ui(data, review)
+
+    flows = list_flows_by_review(data, review_id)
+
+    return {
+        "not_found": False,
+        "book": book,
+        "review": enriched_review,
+        "flows": flows,
+    }

@@ -66,12 +66,34 @@
     </div>
   </section>
 
-  <form method="post" action="{% url 'reviews:create' %}">
+  <form id="reviewForm" method="post" action="{% url 'reviews:create' %}">
     {% csrf_token %}
+    {% if form and form.errors %}
+    <div class="mb-6 rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-700">
+      <p class="font-bold mb-2">入力内容にエラーがあります</p>
+      <ul class="list-disc pl-5 space-y-1">
+        {% for field, errors in form.errors.items %}
+        {% for error in errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
     <section class="border-[#ebeaea] border-b pb-12 mb-12">
       <h2 class="mb-2">カテゴリ</h2>
       <p class="text-xs text-[#707070] mb-2">この書籍に該当するカテゴリを選択してください（複数選択可）</p>
-      {% include "common/category_area.html" %}
+      {% include "common/category_area.html" with mode="form" %}
+      {% if form and form.categories.errors %}
+      <p class="mt-2 text-sm text-red-600">
+        {{ form.categories.errors.0 }}
+      </p>
+      {% endif %}
+      <div id="categoryHiddenFields">
+        {% for c in posted_categories %}
+        <input type="hidden" name="categories" value="{{ c }}">
+        {% endfor %}
+      </div>
     </section>
 
     <section class="mb-12">
@@ -79,149 +101,129 @@
       <p class="text-xs text-[#707070] mb-2">評価を選択してください</p>
 
       <div class="flex flex-wrap gap-2">
-
         {# 0.5 #}
-        <input id="rating-05" type="radio" name="rating" value="0.5" class="peer/r05 sr-only" required>
+        <input id="rating-05" type="radio" name="rating" value="0.5" class="peer/r05 sr-only" {% if posted_rating == "0.5" %}checked{% endif %}>
         <label for="rating-05" class="
-  px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
-  hover:bg-[#dbeaff]
-  peer-checked/r05:bg-customBlue
-  peer-checked/r05:text-white
-  peer-checked/r05:border-customBlue
-  ">
-          0.5
-        </label>
+          px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
+          hover:bg-[#dbeaff]
+          peer-checked/r05:bg-customBlue peer-checked/r05:text-white peer-checked/r05:border-customBlue
+        ">0.5</label>
 
         {# 1.0 #}
-        <input id="rating-10" type="radio" name="rating" value="1.0" class="peer/r10 sr-only">
+        <input id="rating-10" type="radio" name="rating" value="1.0" class="peer/r10 sr-only" {% if posted_rating == "1.0" %}checked{% endif %}>
         <label for="rating-10" class="
-  px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
-  hover:bg-[#dbeaff]
-  peer-checked/r10:bg-customBlue
-  peer-checked/r10:text-white
-  peer-checked/r10:border-customBlue
-  ">
-          1.0
-        </label>
+          px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
+          hover:bg-[#dbeaff]
+          peer-checked/r10:bg-customBlue peer-checked/r10:text-white peer-checked/r10:border-customBlue
+        ">1.0</label>
 
         {# 1.5 #}
-        <input id="rating-15" type="radio" name="rating" value="1.5" class="peer/r15 sr-only">
+        <input id="rating-15" type="radio" name="rating" value="1.5" class="peer/r15 sr-only" {% if posted_rating == "1.5" %}checked{% endif %}>
         <label for="rating-15" class="
-  px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
-  hover:bg-[#dbeaff]
-  peer-checked/r15:bg-customBlue
-  peer-checked/r15:text-white
-  peer-checked/r15:border-customBlue
-  ">
-          1.5
-        </label>
+          px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
+          hover:bg-[#dbeaff]
+          peer-checked/r15:bg-customBlue peer-checked/r15:text-white peer-checked/r15:border-customBlue
+        ">1.5</label>
 
         {# 2.0 #}
-        <input id="rating-20" type="radio" name="rating" value="2.0" class="peer/r20 sr-only">
+        <input id="rating-20" type="radio" name="rating" value="2.0" class="peer/r20 sr-only" {% if posted_rating == "2.0" %}checked{% endif %}>
         <label for="rating-20" class="
-  px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
-  hover:bg-[#dbeaff]
-  peer-checked/r20:bg-customBlue
-  peer-checked/r20:text-white
-  peer-checked/r20:border-customBlue
-  ">
-          2.0
-        </label>
+          px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
+          hover:bg-[#dbeaff]
+          peer-checked/r20:bg-customBlue peer-checked/r20:text-white peer-checked/r20:border-customBlue
+        ">2.0</label>
 
         {# 2.5 #}
-        <input id="rating-25" type="radio" name="rating" value="2.5" class="peer/r25 sr-only">
+        <input id="rating-25" type="radio" name="rating" value="2.5" class="peer/r25 sr-only" {% if posted_rating == "2.5" %}checked{% endif %}>
         <label for="rating-25" class="
-  px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
-  hover:bg-[#dbeaff]
-  peer-checked/r25:bg-customBlue
-  peer-checked/r25:text-white
-  peer-checked/r25:border-customBlue
-  ">
-          2.5
-        </label>
+          px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
+          hover:bg-[#dbeaff]
+          peer-checked/r25:bg-customBlue peer-checked/r25:text-white peer-checked/r25:border-customBlue
+        ">2.5</label>
 
         {# 3.0 #}
-        <input id="rating-30" type="radio" name="rating" value="3.0" class="peer/r30 sr-only">
+        <input id="rating-30" type="radio" name="rating" value="3.0" class="peer/r30 sr-only" {% if posted_rating == "3.0" %}checked{% endif %}>
         <label for="rating-30" class="
-  px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
-  hover:bg-[#dbeaff]
-  peer-checked/r30:bg-customBlue
-  peer-checked/r30:text-white
-  peer-checked/r30:border-customBlue
-  ">
-          3.0
-        </label>
+          px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
+          hover:bg-[#dbeaff]
+          peer-checked/r30:bg-customBlue peer-checked/r30:text-white peer-checked/r30:border-customBlue
+        ">3.0</label>
 
         {# 3.5 #}
-        <input id="rating-35" type="radio" name="rating" value="3.5" class="peer/r35 sr-only">
+        <input id="rating-35" type="radio" name="rating" value="3.5" class="peer/r35 sr-only" {% if posted_rating == "3.5" %}checked{% endif %}>
         <label for="rating-35" class="
-  px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
-  hover:bg-[#dbeaff]
-  peer-checked/r35:bg-customBlue
-  peer-checked/r35:text-white
-  peer-checked/r35:border-customBlue
-  ">
-          3.5
-        </label>
+          px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
+          hover:bg-[#dbeaff]
+          peer-checked/r35:bg-customBlue peer-checked/r35:text-white peer-checked/r35:border-customBlue
+        ">3.5</label>
 
         {# 4.0 #}
-        <input id="rating-40" type="radio" name="rating" value="4.0" class="peer/r40 sr-only">
+        <input id="rating-40" type="radio" name="rating" value="4.0" class="peer/r40 sr-only" {% if posted_rating == "4.0" %}checked{% endif %}>
         <label for="rating-40" class="
-  px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
-  hover:bg-[#dbeaff]
-  peer-checked/r40:bg-customBlue
-  peer-checked/r40:text-white
-  peer-checked/r40:border-customBlue
-  ">
-          4.0
-        </label>
+          px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
+          hover:bg-[#dbeaff]
+          peer-checked/r40:bg-customBlue peer-checked/r40:text-white peer-checked/r40:border-customBlue
+        ">4.0</label>
 
         {# 4.5 #}
-        <input id="rating-45" type="radio" name="rating" value="4.5" class="peer/r45 sr-only">
+        <input id="rating-45" type="radio" name="rating" value="4.5" class="peer/r45 sr-only" {% if posted_rating == "4.5" %}checked{% endif %}>
         <label for="rating-45" class="
-  px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
-  hover:bg-[#dbeaff]
-  peer-checked/r45:bg-customBlue
-  peer-checked/r45:text-white
-  peer-checked/r45:border-customBlue
-  ">
-          4.5
-        </label>
+          px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
+          hover:bg-[#dbeaff]
+          peer-checked/r45:bg-customBlue peer-checked/r45:text-white peer-checked/r45:border-customBlue
+        ">4.5</label>
 
         {# 5.0 #}
-        <input id="rating-50" type="radio" name="rating" value="5.0" class="peer/r50 sr-only">
+        <input id="rating-50" type="radio" name="rating" value="5.0" class="peer/r50 sr-only" {% if posted_rating == "5.0" %}checked{% endif %}>
         <label for="rating-50" class="
-  px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
-  hover:bg-[#dbeaff]
-  peer-checked/r50:bg-customBlue
-  peer-checked/r50:text-white
-  peer-checked/r50:border-customBlue">
-          5.0
-        </label>
+          px-3 py-2 rounded-lg border border-[#d1d1d1] text-sm cursor-pointer
+          hover:bg-[#dbeaff]
+          peer-checked/r50:bg-customBlue peer-checked/r50:text-white peer-checked/r50:border-customBlue
+        ">5.0</label>
       </div>
+      {% if form and form.rating.errors %}
+      <p class="mt-2 text-sm text-red-600">
+        {{ form.rating.errors.0 }}
+      </p>
+      {% endif %}
     </section>
 
     <section>
 
       <div class="mb-9">
         <label class="block text-base mb-2">レビュータイトル</label>
-        <input type="text" name="review_title"
+        <input type="text" name="review_title" value="{{ request.POST.review_title|default_if_none:'' }}"
           class="w-full text-sm rounded-lg border-2 border-[#4788FF4D] bg-customWhite p-3 placeholder:text-customLightGray focus:outline-none focus:ring-2 focus:ring-[#2F6FED] focus:border-transparent"
           placeholder="例：初心者におすすめ" />
+        {% if form and form.review_title.errors %}
+        <p class="mt-2 text-sm text-red-600">
+          {{ form.review_title.errors.0 }}
+        </p>
+        {% endif %}
       </div>
 
       <div class="mb-9">
         <label class="block text-sm mb-2">レビュー本文</label>
         <textarea name="review_text" rows="5"
           class="w-full text-sm rounded-lg border-2 border-[#4788FF4D] bg-customWhite p-3 placeholder:text-customLightGray focus:outline-none focus:ring-2 focus:ring-[#2F6FED] focus:border-transparent"
-          placeholder="この書籍の詳細な感想や、学んだことを記述してください"></textarea>
+          placeholder="この書籍の詳細な感想や、学んだことを記述してください">{{ request.POST.review_text|default_if_none:'' }}</textarea>
+        {% if form and form.review_text.errors %}
+        <p class="mt-2 text-sm text-red-600">
+          {{ form.review_text.errors.0 }}
+        </p>
+        {% endif %}
       </div>
 
       <div class="mb-9 border-[#ebeaea] border-b pb-12">
         <label class="block text-sm mb-2">おすすめする人</label>
         <textarea name="recommended_for" rows="5"
           class="w-full text-sm rounded-lg border-2 border-[#4788FF4D] bg-customWhite p-3 placeholder:text-customLightGray focus:outline-none focus:ring-2 focus:ring-[#2F6FED] focus:border-transparent"
-          placeholder="どんな人にこの書籍をおすすめしますか"></textarea>
+          placeholder="どんな人にこの書籍をおすすめしますか">{{ request.POST.recommended_for|default_if_none:'' }}</textarea>
+        {% if form and form.recommended_for.errors %}
+        <p class="mt-2 text-sm text-red-600">
+          {{ form.recommended_for.errors.0 }}
+        </p>
+        {% endif %}
       </div>
 
       <div class="border-[#ebeaea] border-b mb-12">

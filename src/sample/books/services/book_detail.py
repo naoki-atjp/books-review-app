@@ -45,8 +45,7 @@ def build_book_detail_context(book_id: str) -> Dict[str, Any]:
   reviews = list_reviews_by_book(data, book_id)
 
   # UI用整形（評価/いいね/フロー有無の付与）
-  for r in reviews:
-    enrich_review_ui(data, r)
+  reviews = [enrich_review_ui(data, r) for r in reviews]
 
   # 正常時のcontext
   return {
