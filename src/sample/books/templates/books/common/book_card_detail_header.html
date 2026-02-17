@@ -26,8 +26,8 @@
           <div class="categories-row js-categories-row">
 
             <div class="category-row-group-sub">
-              {% for name in book.categories %}
-              <span class="book-category-item rounded-lg px-3">{{ name }}</span>
+              {% for category in book.categories.all %}
+              <span class="book-category-item rounded-lg px-3">{{ category.category_name }}</span>
               {% endfor %}
             </div>
 

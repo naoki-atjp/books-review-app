@@ -17,7 +17,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const getCsrfToken = () => {
     // cookie から csrftoken を取る
     const match = document.cookie.match(/csrftoken=([^;]+)/);
-    return match ? match[1] : "";
+    if (match) return match[1];
+
+    // もしcookieに無い場合、フォームの hidden input を探す
+    const input = document.querySelector('input[name="csrfmiddlewaretoken"]');
+    return input ? input.value : "";
   };
 
   // UI反映用関数

@@ -3,6 +3,7 @@ from django.conf import settings
 from books.models import Book
 from django.utils import timezone
 from core.models import TimeStampedModel, UserAuditModel, SoftDeleteModel
+from django.db.models import Q 
 
 class Review(TimeStampedModel, UserAuditModel, SoftDeleteModel):
     user = models.ForeignKey(
@@ -47,24 +48,60 @@ class ReviewGood(TimeStampedModel):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
+        null=True, #未ログイン時のいいねを許容
+        blank=True,
         verbose_name='いいねしたユーザー',
         related_name='review_goods',
     )
+
+    # 未ログインユーザーを識別するキー（Cookieに入れる）
+    anon_key = models.CharField(
+        max_length=64,
+        null=True,          # 未ログイン以外は空になるのでNULL許可
+        blank=True,
+        db_index=True,      # 取り消し検索で使うのでindex
+        verbose_name='未ログイン識別キー',
+    )
+
     review = models.ForeignKey(
-        Review,
+        "reviews.Review",
         on_delete=models.PROTECT,
         verbose_name='レビュー',
         related_name='goods',
     )
 
     def __str__(self):
-        return f"{self.user.name} さんが「{self.review.review_title}」に付けたいいね"
+        # user がある時は user名、ない時は未ログイン扱い
+        who = self.user.name if self.user else f"未ログイン({self.anon_key})"
+        return f"{who} が「{self.review.review_title}」に付けたいいね"
 
     class Meta:
-        unique_together = ('user', 'review')
         verbose_name = 'レビューいいね'
         verbose_name_plural = 'レビューいいね'
-  
+
+        # 条件付きとして constraints を使う
+        constraints = [
+            # ログインいいね：user が入ってる時だけ (review, user) を一意にする
+            models.UniqueConstraint(
+                fields=["review", "user"],
+                condition=Q(user__isnull=False),
+                name="uniq_reviewgood_by_user",
+            ),
+
+            # 未ログインいいね：anon_key が入ってる時だけ (review, anon_key) を一意にする
+            models.UniqueConstraint(
+                fields=["review", "anon_key"],
+                condition=Q(anon_key__isnull=False),
+                name="uniq_reviewgood_by_anon",
+            ),
+
+            # user も anon_key も両方NULLは禁止（どっちか必須）
+            models.CheckConstraint(
+                check=Q(user__isnull=False) | Q(anon_key__isnull=False),
+                name="check_reviewgood_user_or_anon_required",
+            ),
+        ]
+
 class Flow(TimeStampedModel, UserAuditModel, SoftDeleteModel):
     review = models.ForeignKey(
         Review,

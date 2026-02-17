@@ -15,8 +15,8 @@ urlpatterns = [
     # いいねトグル
     path(
         "books/<str:book_id>/reviews/<int:review_id>/like/",
-        # views.review_like_toggle,
-        views.review_like_dummy,
+        views.review_like_toggle,
+        # views.review_like_dummy,
         name="like",
     ),
 ]

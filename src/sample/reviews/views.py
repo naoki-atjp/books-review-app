@@ -1,10 +1,9 @@
-from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.generic import TemplateView
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from .models import ReviewGood, Review
+import secrets
 
 from books.services.selected_book_session import (
     get_selected_book_or_none,
@@ -13,7 +12,7 @@ from books.services.selected_book_session import (
 from books.services.categories import get_categories_for_view
 from reviews.services.review_detail import build_review_detail_context
 from .forms import ReviewCreateForm
-from reviews.services.review_like import toggle_like_dummy, toggle_like_db
+from reviews.services.review_like import toggle_like_db
 
 
 class ReviewCreateView(TemplateView):
@@ -122,23 +121,55 @@ def review_detail(request, book_id: str, review_id: int):
 
 
 @require_POST
-@login_required
 def review_like_toggle(request, book_id: str, review_id: int):
-    # DB（将来用）
-    # viewsはサービスを呼ぶだけ
-    result = toggle_like_db(user=request.user, book_id=book_id, review_id=review_id)
+    # いいねトグル（ログイン/未ログイン両対応）
+    # ログイン済み: user=request.user を使う
+    # 未ログイン: cookie の anon_key を使う（なければ発行）
 
+    # ログインしてるか判定
+    is_auth = request.user.is_authenticated
+
+    # 未ログインなら anon_key を用意
+    anon_key = None
+    should_set_cookie = False
+
+    if not is_auth:
+        # cookie から anon_key を探す
+        anon_key = request.COOKIES.get("anon_key")
+
+        if not anon_key:
+            #  無ければ作る（URL安全なランダム文字列）
+            # 64文字に収める（DBがmax_length=64）
+            anon_key = secrets.token_urlsafe(48)[:64]
+            should_set_cookie = True
+
+    # サービスにどっちの識別子かを渡す
+    result = toggle_like_db(
+        user=request.user if is_auth else None,
+        anon_key=anon_key if not is_auth else None,
+        book_id=book_id,
+        review_id=review_id,
+    )
+
+    # not found
     if not result.get("ok") and result.get("status") == 404:
         return JsonResponse(
             {"ok": False, "message": result.get("message", "not found")},
             status=404,
         )
 
-    return JsonResponse(result)
+    # cookie をセットする必要があればレスポンスに付ける
+    response = JsonResponse(result)
 
+    if should_set_cookie:
+        # cookie を保存（未ログインいいねの識別に使う）
+        # max_age: 180日
+        response.set_cookie(
+            "anon_key",
+            anon_key,
+            max_age=60 * 60 * 24 * 180,
+            httponly=True,
+            samesite="Lax",
+        )
 
-@require_POST
-def review_like_dummy(request, book_id: str, review_id: int):
-    # ダミー版
-    result = toggle_like_dummy(session=request.session, review_id=review_id)
-    return JsonResponse(result)
+    return response
