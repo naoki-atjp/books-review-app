@@ -13,6 +13,7 @@ from core.dummy.reviews_dummy_loader import (
     find_review_by_book,
     list_flows_by_review,
     enrich_review_ui,
+    format_book_for_view,
 )
 
 
@@ -58,11 +59,11 @@ def build_review_detail_context(book_id: str, review_id: int) -> Dict[str, Any]:
   # 表示用整形
   review_vm = enrich_review_ui(data, review)
   flows = list_flows_by_review(data, review_id)
-  book = _format_book_categories_for_view(book)
+  book_vm = format_book_for_view(book)
 
   return {
       "not_found": False,
-      "book": book,
+      "book": book_vm,
       "review": review_vm,
       "flows": flows,
   }

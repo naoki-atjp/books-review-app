@@ -11,7 +11,8 @@ from core.dummy.reviews_dummy_loader import (
   load_reviews_dummy,
   find_book,
   list_reviews_by_book,
-  enrich_review_ui
+  enrich_review_ui,
+  format_book_for_view, 
 )
 
 
@@ -34,12 +35,14 @@ def build_book_detail_context(book_id: str) -> Dict[str, Any]:
     }
   
   # categoryを表示用に変換
-  raw_categories = book.get("categories", []) or []
-  book["categories"] = [
-    c.get("category_name", "")
-    for c in raw_categories
-    if c.get("category_name")
-  ]
+  # raw_categories = book.get("categories", []) or []
+  # book["categories"] = [
+  #   c.get("category_name", "")
+  #   for c in raw_categories
+  #   if c.get("category_name")
+  # ]
+
+  book_vm = format_book_for_view(book)
 
   # レビュー一覧取得
   reviews = list_reviews_by_book(data, book_id)
@@ -50,6 +53,6 @@ def build_book_detail_context(book_id: str) -> Dict[str, Any]:
   # 正常時のcontext
   return {
     "book_not_found": False,
-    "book": book,
+    "book": book_vm,
     "reviews": reviews,
   }

@@ -16,6 +16,21 @@ def find_book(data: dict, book_id: str) -> dict | None:
     return next((b for b in books if b.get("book_id") == book_id), None)
 
 
+def format_book_for_view(book: dict) -> dict:
+    # book の categories をテンプレ表示用に整形する
+    b = copy.deepcopy(book)
+    raw_categories = b.get("categories", []) or []
+
+    # "categories" をテンプレ用に文字列リスト化
+    b["categories"] = [
+        c.get("category_name", "")
+        for c in raw_categories
+        if isinstance(c, dict) and c.get("category_name")
+    ]
+
+    return b
+
+
 def list_reviews_by_book(data: dict, book_id: str) -> list[dict]:
     # reviews_review から book_id が一致するレビューだけ返す
     all_reviews = data.get("reviews_review", [])
@@ -66,13 +81,8 @@ def enrich_review_ui(data: dict, review: dict) -> dict:
     full_count = int(rating)
     has_half = (rating - full_count) >= 0.5
 
-    # ui が無い/壊れてても必ず dict を用意
-    base_ui = r.get("ui")
-    if not isinstance(base_ui, dict):
-        base_ui = {}
-
     # ここで作るuiを完成形として上書き
-    ui = {}
+    ui: dict = {}
 
     ui["full_stars"] = list(range(full_count))  # 例：3なら [0,1,2]
     ui["has_half_star"] = has_half
