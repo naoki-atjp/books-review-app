@@ -14,12 +14,13 @@ class User(AbstractUser, TimeStampedModel, UserAuditModel, SoftDeleteModel):
         null=False,
         verbose_name='メールアドレス',
     )
-    password = models.CharField(
-        max_length=128,
-        blank=False,
-        null=False,
-        verbose_name='パスワード',
-    )
+    # AbstractUser の password フィールドを使うためパスワードは自前で書かない
+    # password = models.CharField(
+    #     max_length=128,
+    #     blank=False,
+    #     null=False,
+    #     verbose_name='パスワード',
+    # )
     icon_img = models.ImageField(
         upload_to='user_image',
         blank=True,
