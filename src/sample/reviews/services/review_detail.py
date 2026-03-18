@@ -1,14 +1,17 @@
 # 責務:
 # 「レビュー詳細ページ」で必要な context を作る
 # views.py はこの関数を呼ぶだけにする
-
 from __future__ import annotations
+import logging
 from typing import Any, Dict, List
 
-from django.db.models import Count
+# from django.db.models import Count
 
 from books.models import Book
 from reviews.models import Review, ReviewGood, Flow
+
+# ロガーの作成・取得
+logger = logging.getLogger(__name__)
 
 
 def _build_star_ui(rating: float) -> Dict[str, Any]:
@@ -34,18 +37,33 @@ def _format_book_for_view(book: Book) -> Dict[str, Any]:
     if hasattr(book, "categories"):
         try:
             categories = [c.category_name for c in book.categories.all()]
-        except Exception:
-            categories = []
+
+        # TODO: ユーザー目線でも失敗したことがわかるようにする + ログも残す
+        except AttributeError as e:
+            # NOTE: category_name が無い / categories が想定と違うオブジェクト(想定する例外:仮)
+            # logger.exception(f"Book categories format error (AttributeError): {e}")
+            logger.exception("Book categories format error (AttributeError): %s", e)
+            categories=[]
+
+        except Exception as e:
+            # 想定外の例外のための最後の砦 ログを残す
+            logger.exception("Unexpected error while building categories: %s", e)
+            categories=[]
 
     return {
-        "book_id": book.book_id,
-        "book_title": book.book_title,
-        "book_img": book.book_img,
-        "author": book.author,
-        "company": book.company,
-        "release": book.release,
+        "book_id": getattr(book, "book_id", ""),
+        "book_title": getattr(book, "book_title", ""),
+        "book_img": getattr(book, "book_img", ""),
+        "author": getattr(book, "author", ""),
+        "company": getattr(book, "company", ""),
+        "release": getattr(book, "release", ""),
         "categories": categories,
     }
+    
+    # except Exception:
+    #     # 本来はここで想定できなかった謎のエラーをログ出力する
+    #     # outputlog(file_name, func_name, file_line)
+    #     categories = []
 
 
 def build_review_detail_context(book_id: str, review_id: int) -> Dict[str, Any]:
