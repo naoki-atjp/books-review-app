@@ -1,17 +1,70 @@
 {% extends "base.html" %}
 {% block page_content %}
-<div class="wrapper pt-16">
-  <h1 class="text-2xl mb-4">ログイン（開発用）</h1>
+<div class="wrapper max-w-[540px] pt-12 mb-8">
+  <div class="mb-8 text-center">
+    <img src="../../static/img/logo-icon.png" alt="RevitHubのロゴアイコン" class="block w-16 mb-6 mx-auto">
+    <h1 class="flex items-center justify-center gap-2 text-[24px] text-[#000480] font-medium">
+      ログイン
+    </h1>
+  </div>
 
-  <form method="post" class="space-y-4">
+  <form method="post">
     {% csrf_token %}
 
-    <!-- Django標準のログインフォーム -->
-    {{ form.as_p }}
+    <div
+      class="rounded-[24px] border border-[#D9E2F2] bg-white px-6 py-7 shadow-[0_6px_18px_rgba(0,0,0,0.1)] md:px-8 md:py-8">
+      <div class="mb-6">
+        <!-- ラベル -->
+        <label for="id_username" class="mb-2 block text-[15px] font-medium text-[#333333]">
+          メールアドレス
+        </label>
 
-    <button type="submit" class="button px-4 py-2">
-      ログイン
-    </button>
+        <!-- 入力欄
+          Django標準ログインでは username にメールアドレスを使うことが多いので
+          name は username に設定
+        -->
+        <input type="email" name="username" id="id_username" placeholder="example@email.com"
+          class="w-full rounded-[14px] border border-[#D9D9D9] bg-[#F5F5F5] px-4 py-3 text-[15px] text-[#333333] placeholder:text-[#9A9A9A] outline-none transition focus:border-[#1565E5] focus:bg-white" />
+      </div>
+
+      <div class="mb-3">
+        <label for="id_password" class="mb-2 block text-[15px] font-medium text-[#333333]">
+          パスワード
+        </label>
+
+        <input type="password" name="password" id="id_password"
+          class="w-full rounded-[14px] border border-[#D9D9D9] bg-[#F5F5F5] px-4 py-3 text-[15px] text-[#333333] outline-none transition focus:border-[#1565E5] focus:bg-white" />
+      </div>
+
+      <div class="mb-6">
+        <a href="#" class="text-[13px] font-medium text-[#1565E5] hover:underline">
+          パスワードを忘れた場合
+        </a>
+      </div>
+
+      <button type="submit"
+        class="mb-8 flex w-full items-center justify-center gap-2 rounded-[14px] bg-[#1565E5] px-5 py-3 text-[16px] font-bold text-white transition hover:opacity-90">
+        <img src="../../static/img/login.svg" alt="" class="w-5">
+        <span>ログイン</span>
+      </button>
+
+      <div class="mb-7 flex items-center justify-center gap-3">
+        <div class="h-px flex-1 bg-[#D9D9D9]"></div>
+        <p class="text-[14px] text-[#555555]">または</p>
+        <div class="h-px flex-1 bg-[#D9D9D9]"></div>
+      </div>
+
+      <div class="text-center">
+        <p class="mb-4 text-[15px] text-[#555555]">
+          アカウントをお持ちでない場合
+        </p>
+
+        <a href="#"
+          class="flex w-full items-center justify-center rounded-[14px] border border-[#1565E5] bg-white px-5 py-3 text-[16px] text-[#1565E5] transition hover:bg-[#F7FAFF]">
+          新規登録
+        </a>
+      </div>
+    </div>
   </form>
 </div>
 {% endblock %}
