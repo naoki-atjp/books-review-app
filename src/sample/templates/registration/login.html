@@ -10,21 +10,29 @@
 
   <form method="post">
     {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next_url }}">
 
     <div
       class="rounded-[24px] border border-[#D9E2F2] bg-white px-6 py-7 shadow-[0_6px_18px_rgba(0,0,0,0.1)] md:px-8 md:py-8">
+      {% if form.non_field_errors %}
+      <div class="mb-4 rounded-[14px] border border-[#F2C6C6] bg-[#FFF1F1] px-4 py-3 text-[14px] text-[#C62828]">
+        {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+
       <div class="mb-6">
-        <!-- ラベル -->
         <label for="id_username" class="mb-2 block text-[15px] font-medium text-[#333333]">
           メールアドレス
         </label>
 
-        <!-- 入力欄
-          Django標準ログインでは username にメールアドレスを使うことが多いので
-          name は username に設定
-        -->
         <input type="email" name="username" id="id_username" placeholder="example@email.com"
+          value="{{ form.username.value|default:'' }}"
           class="w-full rounded-[14px] border border-[#D9D9D9] bg-[#F5F5F5] px-4 py-3 text-[15px] text-[#333333] placeholder:text-[#9A9A9A] outline-none transition focus:border-[#1565E5] focus:bg-white" />
+        {% for error in form.username.errors %}
+        <p class="mt-2 text-[13px] text-[#C62828]">{{ error }}</p>
+        {% endfor %}
       </div>
 
       <div class="mb-3">
@@ -34,6 +42,9 @@
 
         <input type="password" name="password" id="id_password"
           class="w-full rounded-[14px] border border-[#D9D9D9] bg-[#F5F5F5] px-4 py-3 text-[15px] text-[#333333] outline-none transition focus:border-[#1565E5] focus:bg-white" />
+        {% for error in form.password.errors %}
+        <p class="mt-2 text-[13px] text-[#C62828]">{{ error }}</p>
+        {% endfor %}
       </div>
 
       <div class="mb-6">

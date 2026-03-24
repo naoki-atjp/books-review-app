@@ -1,13 +1,53 @@
 # 責務：
+# ログイン処理
 # マイページ表示（GET）
 # 編集保存（POST）：いまはDB保存はなし。入力チェックとトーストだけ整える
 
-from django.shortcuts import render, redirect
+from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth import login as auth_login
 from django.contrib.auth.decorators import login_required
-from users.services.user_dummy_service import load_user_dummy 
-from users.forms import UserEditForm
+from django.shortcuts import redirect, render
+from django.utils.http import url_has_allowed_host_and_scheme
+
+from users.forms import EmailAuthenticationForm, UserEditForm
 from users.services.mypage_context_service import build_mypage_context
+from users.services.user_dummy_service import load_user_dummy 
+
+
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect("home")
+
+    next_url = request.GET.get("next") or request.POST.get("next") or ""
+    form = EmailAuthenticationForm(request=request, data=request.POST or None)
+
+    if request.method == "POST":
+        if form.is_valid():
+            auth_login(request, form.get_user())
+
+            redirect_to = next_url
+            if redirect_to and url_has_allowed_host_and_scheme(
+                url=redirect_to,
+                allowed_hosts={request.get_host()},
+                require_https=request.is_secure(),
+            ):
+                return redirect(redirect_to)
+
+            return redirect(settings.LOGIN_REDIRECT_URL)
+
+        for err in form.non_field_errors():
+            messages.error(request, err)
+
+    return render(
+        request,
+        "registration/login.html",
+        {
+            "form": form,
+            "next_url": next_url,
+        },
+    )
+
 
 @login_required
 def mypage_view(request):

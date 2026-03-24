@@ -9,7 +9,6 @@ from django.contrib.auth.forms import AuthenticationForm
 User = get_user_model()
 
 
-#TODO:  class EmailAuthenticationFormを読んで理解する
 class EmailAuthenticationForm(AuthenticationForm):
     # ログイン画面専用フォーム
     # username ではなく email でログインできるようにする
