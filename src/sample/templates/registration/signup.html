@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load static %}
+{% block page_content %}
+<div class="wrapper max-w-[720px] pt-12 pb-16">
+  <div class="mb-10 text-center">
+    <img src="{% static 'img/logo-icon.png' %}" alt="RevitHubのロゴアイコン" class="mx-auto mb-6 block w-16">
+    <h1 class="mb-4 text-[24px] font-medium text-[#000480]">アカウント作成</h1>
+    <p class="text-[16px] text-[#333333]">IT書籍のレビュー投稿を始めましょう</p>
+  </div>
+
+  <form method="post" class="mx-auto max-w-[560px]">
+    {% csrf_token %}
+    <div class="rounded-[24px] border border-[#D9E2F2] bg-white px-6 py-7 shadow-[0_8px_24px_rgba(21,101,229,0.16)] md:px-10 md:py-10">
+      {% if messages %}
+      <div class="mb-4 space-y-2">
+        {% for message in messages %}
+        <div class="rounded-[14px] border border-[#F2C6C6] bg-[#FFF1F1] px-4 py-3 text-[14px] text-[#C62828]">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% if form.non_field_errors %}
+      <div class="mb-4 rounded-[14px] border border-[#F2C6C6] bg-[#FFF1F1] px-4 py-3 text-[14px] text-[#C62828]">
+        {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="mb-6">
+        <label for="{{ form.name.id_for_label }}" class="mb-2 block text-[15px] font-medium text-[#333333]">
+          ユーザー名
+        </label>
+        {{ form.name }}
+        {% for error in form.name.errors %}
+        <p class="mt-2 text-[13px] text-[#C62828]">{{ error }}</p>
+        {% endfor %}
+      </div>
+
+      <div class="mb-6">
+        <label for="{{ form.email.id_for_label }}" class="mb-2 block text-[15px] font-medium text-[#333333]">
+          メールアドレス
+        </label>
+        {{ form.email }}
+        {% for error in form.email.errors %}
+        <p class="mt-2 text-[13px] text-[#C62828]">{{ error }}</p>
+        {% endfor %}
+      </div>
+
+      <div class="mb-6">
+        <label for="{{ form.password1.id_for_label }}" class="mb-2 block text-[15px] font-medium text-[#333333]">
+          パスワード
+        </label>
+        {{ form.password1 }}
+        {% for error in form.password1.errors %}
+        <p class="mt-2 text-[13px] text-[#C62828]">{{ error }}</p>
+        {% endfor %}
+      </div>
+
+      <div class="mb-8">
+        <label for="{{ form.password2.id_for_label }}" class="mb-2 block text-[15px] font-medium text-[#333333]">
+          パスワード（確認）
+        </label>
+        {{ form.password2 }}
+        {% for error in form.password2.errors %}
+        <p class="mt-2 text-[13px] text-[#C62828]">{{ error }}</p>
+        {% endfor %}
+      </div>
+
+      <button type="submit"
+        class="mb-10 flex w-full items-center justify-center gap-2 rounded-[14px] bg-[#1565E5] px-5 py-3 text-[16px] font-bold text-white transition hover:opacity-90">
+        <img src="{% static 'img/login.svg' %}" alt="" class="w-5">
+        <span>アカウントを作成</span>
+      </button>
+
+      <div class="mb-7 flex items-center justify-center gap-3">
+        <div class="h-px flex-1 bg-[#D9D9D9]"></div>
+        <p class="text-[14px] text-[#555555]">または</p>
+        <div class="h-px flex-1 bg-[#D9D9D9]"></div>
+      </div>
+
+      <div class="text-center">
+        <p class="mb-4 text-[15px] text-[#555555]">すでにアカウントをお持ちの場合</p>
+        <a href="{% url 'login' %}"
+          class="flex w-full items-center justify-center rounded-[14px] border border-[#1565E5] bg-white px-5 py-3 text-[16px] font-bold text-[#1565E5] transition hover:bg-[#F7FAFF]">
+          ログイン
+        </a>
+      </div>
+    </div>
+  </form>
+
+  <div class="mt-10 text-center">
+    <a href="{% url 'home' %}" class="inline-flex items-center gap-2 text-[16px] font-medium text-[#1565E5] hover:underline">
+      <span aria-hidden="true">←</span>
+      <span>ホームに戻る</span>
+    </a>
+  </div>
+</div>
+{% endblock %}

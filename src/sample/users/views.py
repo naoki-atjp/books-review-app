@@ -3,18 +3,45 @@
 # マイページ表示（GET）
 # 編集保存（POST）：いまはDB保存はなし。入力チェックとトーストだけ整える
 
+import uuid
+
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import never_cache
+from django.db import IntegrityError
 from django.shortcuts import redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
 
-from users.forms import EmailAuthenticationForm, UserEditForm
+from users.forms import EmailAuthenticationForm, SignupForm, UserEditForm
 from users.services.mypage_context_service import build_mypage_context
 from users.services.user_dummy_service import load_user_dummy 
 
+User = get_user_model()
 
+
+def _generate_internal_username():
+    while True:
+        username = f"user_{uuid.uuid4().hex}"
+        if not User.objects.filter(username=username).exists():
+            return username
+
+
+def csrf_failure_view(request, reason=""):
+    if request.path == "/users/signup/":
+        messages.error(request, "ページの有効期限が切れました。もう一度入力してアカウントを作成してください。")
+        return redirect("users:signup")
+
+    if request.path == "/accounts/login/":
+        messages.error(request, "ページの有効期限が切れました。もう一度ログインしてください。")
+        return redirect("login")
+
+    return render(request, "403.html", status=403)
+
+
+@never_cache
 def login_view(request):
     if request.user.is_authenticated:
         return redirect("home")
@@ -45,6 +72,36 @@ def login_view(request):
         {
             "form": form,
             "next_url": next_url,
+        },
+    )
+
+
+@never_cache
+def signup_view(request):
+    if request.user.is_authenticated:
+        return redirect("home")
+
+    form = SignupForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        try:
+            user = User.objects.create_user(
+                username=_generate_internal_username(),
+                email=form.cleaned_data["email"],
+                name=form.cleaned_data["name"],
+                password=form.cleaned_data["password1"],
+            )
+        except IntegrityError:
+            form.add_error("email", "このメールアドレスは既に登録されています。")
+        else:
+            auth_login(request, user)
+            return redirect("home")
+
+    return render(
+        request,
+        "registration/signup.html",
+        {
+            "form": form,
         },
     )
 

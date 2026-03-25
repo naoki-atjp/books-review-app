@@ -1,8 +1,9 @@
 {% extends "base.html" %}
+{% load static %}
 {% block page_content %}
 <div class="wrapper max-w-[540px] pt-12 mb-8">
   <div class="mb-8 text-center">
-    <img src="../../static/img/logo-icon.png" alt="RevitHubのロゴアイコン" class="block w-16 mb-6 mx-auto">
+    <img src="{% static 'img/logo-icon.png' %}" alt="RevitHubのロゴアイコン" class="block w-16 mb-6 mx-auto">
     <h1 class="flex items-center justify-center gap-2 text-[24px] text-[#000480] font-medium">
       ログイン
     </h1>
@@ -55,7 +56,7 @@
 
       <button type="submit"
         class="mb-8 flex w-full items-center justify-center gap-2 rounded-[14px] bg-[#1565E5] px-5 py-3 text-[16px] font-bold text-white transition hover:opacity-90">
-        <img src="../../static/img/login.svg" alt="" class="w-5">
+        <img src="{% static 'img/login.svg' %}" alt="" class="w-5">
         <span>ログイン</span>
       </button>
 
@@ -70,7 +71,7 @@
           アカウントをお持ちでない場合
         </p>
 
-        <a href="#"
+        <a href="{% url 'users:signup' %}"
           class="flex w-full items-center justify-center rounded-[14px] border border-[#1565E5] bg-white px-5 py-3 text-[16px] text-[#1565E5] transition hover:bg-[#F7FAFF]">
           新規登録
         </a>

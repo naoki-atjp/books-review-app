@@ -1,8 +1,17 @@
+import uuid
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from core.models import TimeStampedModel, UserAuditModel, SoftDeleteModel
 
 class User(AbstractUser, TimeStampedModel, UserAuditModel, SoftDeleteModel):
+    uuid = models.UUIDField(
+        default=uuid.uuid4,
+        unique=True,
+        editable=False,
+        db_index=True,
+        verbose_name='UUID',
+    )
     name = models.CharField(
         max_length=30,
         verbose_name='ユーザー名',
