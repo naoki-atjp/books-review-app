@@ -23,6 +23,10 @@ class User(AbstractUser, TimeStampedModel, UserAuditModel, SoftDeleteModel):
         null=False,
         verbose_name='メールアドレス',
     )
+    is_email_verified = models.BooleanField(
+        default=False,
+        verbose_name='メール認証済み',
+    )
     # AbstractUser の password フィールドを使うためパスワードは自前で書かない
     # password = models.CharField(
     #     max_length=128,

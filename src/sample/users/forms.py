@@ -49,6 +49,7 @@ class EmailAuthenticationForm(AuthenticationForm):
     error_messages = {
         "invalid_login": "メールアドレスまたはパスワードが正しくありません。",
         "inactive": "このアカウントは無効です。",
+        "unverified_email": "メール認証が完了していません。確認メールをご確認ください。",
     }
 
     def clean(self):
@@ -79,6 +80,15 @@ class EmailAuthenticationForm(AuthenticationForm):
                 self.confirm_login_allowed(self.user_cache)
 
         return self.cleaned_data
+
+    def confirm_login_allowed(self, user):
+        super().confirm_login_allowed(user)
+
+        if not getattr(user, "is_email_verified", False):
+            raise forms.ValidationError(
+                self.error_messages["unverified_email"],
+                code="unverified_email",
+            )
 
 
 class UserEditForm(forms.Form):

@@ -8,16 +8,20 @@ import uuid
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
 from django.contrib.auth.views import PasswordResetDoneView, PasswordResetView
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
-from django.urls import reverse_lazy
+from django.template.loader import render_to_string
+from django.urls import reverse, reverse_lazy
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 from django.db import IntegrityError
 from django.shortcuts import redirect, render
-from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import url_has_allowed_host_and_scheme, urlsafe_base64_decode, urlsafe_base64_encode
 
 from users.forms import EmailAuthenticationForm, SignupForm, UserEditForm
 from users.services.mypage_context_service import build_mypage_context
@@ -38,6 +42,32 @@ def _generate_internal_username():
         username = f"user_{uuid.uuid4().hex}"
         if not User.objects.filter(username=username).exists():
             return username
+
+
+def _send_signup_verification_email(request, user):
+    verify_url = request.build_absolute_uri(
+        reverse(
+            "users:verify_email",
+            kwargs={
+                "uidb64": urlsafe_base64_encode(force_bytes(user.pk)),
+                "token": default_token_generator.make_token(user),
+            },
+        )
+    )
+    subject = render_to_string("registration/signup_verification_subject.txt").strip()
+    message = render_to_string(
+        "registration/signup_verification_email.txt",
+        {
+            "user": user,
+            "verify_url": verify_url,
+        },
+    )
+    send_mail(
+        subject=subject,
+        message=message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[user.email],
+    )
 
 
 def csrf_failure_view(request, reason=""):
@@ -109,8 +139,8 @@ def signup_view(request):
         except IntegrityError:
             form.add_error("email", "このメールアドレスは既に登録されています。")
         else:
-            auth_login(request, user)
-            return redirect("home")
+            _send_signup_verification_email(request, user)
+            return redirect("users:signup_verification_sent")
 
     return render(
         request,
@@ -118,6 +148,43 @@ def signup_view(request):
         {
             "form": form,
         },
+    )
+
+
+@never_cache
+def signup_verification_sent_view(request):
+    if request.user.is_authenticated:
+        return redirect("home")
+
+    return render(request, "registration/signup_verification_sent.html")
+
+
+@never_cache
+def verify_email_view(request, uidb64, token):
+    user = None
+
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user and default_token_generator.check_token(user, token):
+        if not user.is_email_verified:
+            user.is_email_verified = True
+            user.save(update_fields=["is_email_verified"])
+
+        return render(
+            request,
+            "registration/signup_verification_complete.html",
+            {"is_success": True},
+        )
+
+    return render(
+        request,
+        "registration/signup_verification_complete.html",
+        {"is_success": False},
+        status=400,
     )
 
 

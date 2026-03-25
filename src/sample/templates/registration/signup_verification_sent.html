@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load static %}
+{% block page_content %}
+<div class="wrapper max-w-[540px] pt-12 pb-16">
+  <div class="mb-8 text-center">
+    <h1 class="text-[24px] font-medium text-[#000480]">確認メールを送信しました</h1>
+  </div>
+
+  <div class="rounded-[24px] border border-[#D9E2F2] bg-white px-6 py-7 shadow-[0_6px_18px_rgba(0,0,0,0.1)] md:px-8 md:py-8">
+    <div class="text-[16px] leading-[1.6] text-[#333333]">
+      <p>登録したメールアドレス宛に、確認メールを送信しました。</p>
+      <p class="mt-4">メール内の案内に従って認証を完了してからログインしてください。</p>
+      <p class="mt-4 text-[14px] text-[#666666]">今回は確認メール送信機能の土台のみ実装しているため、実メール送信サービスへの接続はまだ行っていません。</p>
+    </div>
+
+    <a href="{% url 'login' %}"
+      class="mt-8 flex w-full items-center justify-center rounded-[14px] border border-[#1565E5] bg-white px-5 py-3 text-[16px] font-bold text-[#1565E5] transition hover:bg-[#F7FAFF]">
+      ログイン画面へ
+    </a>
+  </div>
+</div>
+{% endblock %}

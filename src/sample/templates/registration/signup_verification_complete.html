@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+{% block page_content %}
+<div class="wrapper max-w-[540px] pt-12 pb-16">
+  <div class="mb-8 text-center">
+    <h1 class="text-[24px] font-medium text-[#000480]">
+      {% if is_success %}メール認証が完了しました{% else %}認証リンクが無効です{% endif %}
+    </h1>
+  </div>
+
+  <div class="rounded-[24px] border border-[#D9E2F2] bg-white px-6 py-7 shadow-[0_6px_18px_rgba(0,0,0,0.1)] md:px-8 md:py-8">
+    <div class="text-[16px] leading-[1.6] text-[#333333]">
+      {% if is_success %}
+      <p>メール認証が完了しました。</p>
+      <p class="mt-4">ログイン画面からログインしてください。</p>
+      {% else %}
+      <p>この認証リンクは無効、または有効期限切れです。</p>
+      <p class="mt-4">もう一度新規登録からやり直してください。</p>
+      {% endif %}
+    </div>
+
+    <a href="{% url 'login' %}"
+      class="mt-8 flex w-full items-center justify-center rounded-[14px] bg-[#1565E5] px-5 py-3 text-[16px] font-bold text-white transition hover:opacity-90">
+      ログイン画面へ
+    </a>
+  </div>
+</div>
+{% endblock %}
