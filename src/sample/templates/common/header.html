@@ -2,7 +2,7 @@
 
 <header class="bg-customWhite shadow-md py-4">
   <div class="container flex justify-between items-center">
-    <a href="#">
+    <a href="{% url 'home' %}">
       <img src="{% static 'img/logo.svg' %}" class="w-32" />
     </a>
 
@@ -45,8 +45,11 @@
 
       <!-- ログイン前 -->
       {% else %}
-      <a href="{% url 'users:signup' %}" class="hover:underline">新規登録</a>
-      <a href="{% url 'login' %}" class="hover:underline">ログイン</a>
+      <a href="{% url 'login' %}" class="px-2 py-1 text-[16px] font-medium text-[#111111] hover:underline">ログイン</a>
+      <a href="{% url 'users:signup' %}"
+        class="rounded-[14px] border border-[#1565E5] px-6 py-3 text-[16px] font-bold text-[#1565E5] transition hover:bg-[#F7FAFF]">
+        新規登録
+      </a>
       {% endif %}
     </nav>
   </div>

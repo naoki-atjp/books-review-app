@@ -112,6 +112,14 @@ def signup_view(request):
     )
 
 
+@never_cache
+def password_reset_request_view(request):
+    if request.user.is_authenticated:
+        return redirect("home")
+
+    return render(request, "registration/password_reset_request.html")
+
+
 @require_POST
 def logout_view(request):
     auth_logout(request)
