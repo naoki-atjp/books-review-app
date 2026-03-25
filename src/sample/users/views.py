@@ -23,7 +23,7 @@ from django.shortcuts import redirect, render
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import url_has_allowed_host_and_scheme, urlsafe_base64_decode, urlsafe_base64_encode
 
-from users.forms import EmailAuthenticationForm, SignupForm, UserEditForm
+from users.forms import EmailAuthenticationForm, ResendVerificationEmailForm, SignupForm, UserEditForm
 from users.services.mypage_context_service import build_mypage_context
 from users.services.user_dummy_service import load_user_dummy 
 
@@ -93,6 +93,7 @@ def login_view(request):
 
     next_url = request.GET.get("next") or request.POST.get("next") or ""
     form = EmailAuthenticationForm(request=request, data=request.POST or None)
+    show_resend_verification_link = False
 
     if request.method == "POST":
         if form.is_valid():
@@ -108,6 +109,7 @@ def login_view(request):
 
             return redirect(settings.LOGIN_REDIRECT_URL)
 
+        show_resend_verification_link = form.has_unverified_email_error()
         for err in form.non_field_errors():
             messages.error(request, err)
 
@@ -117,6 +119,7 @@ def login_view(request):
         {
             "form": form,
             "next_url": next_url,
+            "show_resend_verification_link": show_resend_verification_link,
         },
     )
 
@@ -157,6 +160,34 @@ def signup_verification_sent_view(request):
         return redirect("home")
 
     return render(request, "registration/signup_verification_sent.html")
+
+
+@never_cache
+def resend_verification_email_view(request):
+    if request.user.is_authenticated:
+        return redirect("home")
+
+    form = ResendVerificationEmailForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        user = User.objects.filter(email__iexact=form.cleaned_data["email"]).first()
+        if user and not user.is_email_verified:
+            _send_signup_verification_email(request, user)
+        return redirect("users:resend_verification_email_done")
+
+    return render(
+        request,
+        "registration/resend_verification_email.html",
+        {"form": form},
+    )
+
+
+@never_cache
+def resend_verification_email_done_view(request):
+    if request.user.is_authenticated:
+        return redirect("home")
+
+    return render(request, "registration/resend_verification_email_done.html")
 
 
 @never_cache

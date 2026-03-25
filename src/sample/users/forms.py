@@ -90,6 +90,12 @@ class EmailAuthenticationForm(AuthenticationForm):
                 code="unverified_email",
             )
 
+    def has_unverified_email_error(self):
+        return any(
+            error.code == "unverified_email"
+            for error in self.errors.as_data().get("__all__", [])
+        )
+
 
 class UserEditForm(forms.Form):
     # プロフィール（名前/メール）
@@ -252,3 +258,21 @@ class SignupForm(forms.Form):
                 self.add_error("password1", exc)
 
         return cleaned
+
+
+class ResendVerificationEmailForm(forms.Form):
+    email = forms.EmailField(
+        required=True,
+        label="メールアドレス",
+        widget=forms.EmailInput(
+            attrs={
+                "class": "w-full rounded-[14px] border border-[#D9D9D9] bg-[#F5F5F5] px-4 py-3 text-[15px] text-[#333333] placeholder:text-[#9A9A9A] outline-none transition focus:border-[#1565E5] focus:bg-white",
+                "placeholder": "example@email.com",
+                "autocomplete": "email",
+            }
+        ),
+        error_messages={
+            "required": "メールアドレスを入力してください。",
+            "invalid": "正しいメールアドレス形式で入力してください。",
+        },
+    )

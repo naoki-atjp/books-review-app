@@ -52,6 +52,11 @@
         <a href="{% url 'users:password_reset' %}" class="text-[13px] font-medium text-[#1565E5] hover:underline">
           パスワードを忘れた場合
         </a>
+        {% if show_resend_verification_link %}
+        <a href="{% url 'users:resend_verification_email' %}" class="mt-2 block text-[13px] font-medium text-[#1565E5] hover:underline">
+          認証メールが届いていない場合はこちら
+        </a>
+        {% endif %}
       </div>
 
       <button type="submit"
