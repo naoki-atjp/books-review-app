@@ -8,9 +8,11 @@ import uuid
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+from django.contrib.auth.views import PasswordResetDoneView, PasswordResetView
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse_lazy
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 from django.db import IntegrityError
@@ -22,6 +24,13 @@ from users.services.mypage_context_service import build_mypage_context
 from users.services.user_dummy_service import load_user_dummy 
 
 User = get_user_model()
+
+
+class AnonymousOnlyMixin:
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect("home")
+        return super().dispatch(request, *args, **kwargs)
 
 
 def _generate_internal_username():
@@ -112,12 +121,15 @@ def signup_view(request):
     )
 
 
-@never_cache
-def password_reset_request_view(request):
-    if request.user.is_authenticated:
-        return redirect("home")
+class PasswordResetRequestView(AnonymousOnlyMixin, PasswordResetView):
+    template_name = "registration/password_reset_request.html"
+    email_template_name = "registration/password_reset_email.txt"
+    subject_template_name = "registration/password_reset_subject.txt"
+    success_url = reverse_lazy("users:password_reset_done")
 
-    return render(request, "registration/password_reset_request.html")
+
+class PasswordResetDonePageView(AnonymousOnlyMixin, PasswordResetDoneView):
+    template_name = "registration/password_reset_done.html"
 
 
 @require_POST

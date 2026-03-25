@@ -2128,6 +2128,10 @@ a {
   line-height: 1.375;
 }
 
+.leading-\[1\.6\] {
+  line-height: 1.6;
+}
+
 .tracking-\[0\.8px\] {
   letter-spacing: 0.8px;
 }
@@ -2288,6 +2292,11 @@ a {
 .text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
+}
+
+.text-\[\#666666\] {
+  --tw-text-opacity: 1;
+  color: rgb(102 102 102 / var(--tw-text-opacity));
 }
 
 .opacity-50 {
