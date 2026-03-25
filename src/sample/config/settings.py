@@ -149,5 +149,5 @@ USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_PORT = True
 
 LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/accounts/login/"
 CSRF_FAILURE_VIEW = 'users.views.csrf_failure_view'

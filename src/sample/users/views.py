@@ -9,8 +9,10 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth import login as auth_login
+from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
+from django.views.decorators.http import require_POST
 from django.db import IntegrityError
 from django.shortcuts import redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -37,6 +39,10 @@ def csrf_failure_view(request, reason=""):
     if request.path == "/accounts/login/":
         messages.error(request, "ページの有効期限が切れました。もう一度ログインしてください。")
         return redirect("login")
+
+    if request.path == "/users/logout/":
+        messages.error(request, "操作を完了できませんでした。もう一度お試しください。")
+        return redirect(settings.LOGOUT_REDIRECT_URL)
 
     return render(request, "403.html", status=403)
 
@@ -105,6 +111,11 @@ def signup_view(request):
         },
     )
 
+
+@require_POST
+def logout_view(request):
+    auth_logout(request)
+    return redirect(settings.LOGOUT_REDIRECT_URL)
 
 @login_required
 def mypage_view(request):
