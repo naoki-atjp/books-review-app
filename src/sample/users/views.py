@@ -8,24 +8,29 @@ import uuid
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
-from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
-from django.contrib.auth.views import PasswordResetDoneView, PasswordResetView
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.views import (
+    PasswordResetCompleteView,
+    PasswordResetConfirmView,
+    PasswordResetDoneView,
+    PasswordResetView,
+)
+from django.core.mail import send_mail
+from django.db import IntegrityError
+from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
-from django.db import IntegrityError
-from django.shortcuts import redirect, render
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import url_has_allowed_host_and_scheme, urlsafe_base64_decode, urlsafe_base64_encode
 
 from users.forms import EmailAuthenticationForm, ResendVerificationEmailForm, SignupForm, UserEditForm
 from users.services.mypage_context_service import build_mypage_context
-from users.services.user_dummy_service import load_user_dummy 
+from users.services.user_dummy_service import load_user_dummy
 
 User = get_user_model()
 
@@ -54,9 +59,9 @@ def _send_signup_verification_email(request, user):
             },
         )
     )
-    subject = render_to_string("registration/signup_verification_subject.txt").strip()
+    subject = render_to_string("users/signup/verification_subject.txt").strip()
     message = render_to_string(
-        "registration/signup_verification_email.txt",
+        "users/signup/verification_email.txt",
         {
             "user": user,
             "verify_url": verify_url,
@@ -147,7 +152,7 @@ def signup_view(request):
 
     return render(
         request,
-        "registration/signup.html",
+        "users/signup/form.html",
         {
             "form": form,
         },
@@ -159,7 +164,7 @@ def signup_verification_sent_view(request):
     if request.user.is_authenticated:
         return redirect("home")
 
-    return render(request, "registration/signup_verification_sent.html")
+    return render(request, "users/signup/verification_sent.html")
 
 
 @never_cache
@@ -177,7 +182,7 @@ def resend_verification_email_view(request):
 
     return render(
         request,
-        "registration/resend_verification_email.html",
+        "users/email_verification/resend.html",
         {"form": form},
     )
 
@@ -187,7 +192,7 @@ def resend_verification_email_done_view(request):
     if request.user.is_authenticated:
         return redirect("home")
 
-    return render(request, "registration/resend_verification_email_done.html")
+    return render(request, "users/email_verification/resend_done.html")
 
 
 @never_cache
@@ -207,33 +212,43 @@ def verify_email_view(request, uidb64, token):
 
         return render(
             request,
-            "registration/signup_verification_complete.html",
+            "users/signup/verification_complete.html",
             {"is_success": True},
         )
 
     return render(
         request,
-        "registration/signup_verification_complete.html",
+        "users/signup/verification_complete.html",
         {"is_success": False},
         status=400,
     )
 
 
 class PasswordResetRequestView(AnonymousOnlyMixin, PasswordResetView):
-    template_name = "registration/password_reset_request.html"
-    email_template_name = "registration/password_reset_email.txt"
-    subject_template_name = "registration/password_reset_subject.txt"
+    template_name = "registration/password_reset/request.html"
+    email_template_name = "registration/password_reset/email.txt"
+    subject_template_name = "registration/password_reset/subject.txt"
     success_url = reverse_lazy("users:password_reset_done")
 
 
 class PasswordResetDonePageView(AnonymousOnlyMixin, PasswordResetDoneView):
-    template_name = "registration/password_reset_done.html"
+    template_name = "registration/password_reset/done.html"
+
+
+class PasswordResetConfirmPageView(PasswordResetConfirmView):
+    template_name = "registration/password_reset/confirm.html"
+    success_url = reverse_lazy("password_reset_complete")
+
+
+class PasswordResetCompletePageView(PasswordResetCompleteView):
+    template_name = "registration/password_reset/complete.html"
 
 
 @require_POST
 def logout_view(request):
     auth_logout(request)
     return redirect(settings.LOGOUT_REDIRECT_URL)
+
 
 @login_required
 def mypage_view(request):
